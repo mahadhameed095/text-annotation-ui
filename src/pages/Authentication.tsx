@@ -1,7 +1,8 @@
 import { Auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
-import { auth } from '../../firebase-config';
+import { auth, db } from '../../firebase-config';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect }  from 'react';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
@@ -49,7 +50,12 @@ const Authentication = () => {
           createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
               console.log("sign up successful");
               console.log(auth);
-              navigate("/");
+
+              const colRef = collection(db, "users");
+              addDoc(colRef, {
+                email: formik.values.email,
+                name: formik.values.name
+              }).then(() => navigate("/"))
           })
           .catch((err) => {
               console.log(err);
@@ -124,14 +130,29 @@ const Authentication = () => {
                                 name="password"
                         /> 
                 </div>
-
+                <div className='mb-4'>  
+                    {
+                        isRegister &&
+                            <>
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                 Confirm Password
+                                </label>
+                                <input
+                                    className='shadow w-full border rounded py-2 appearance-none'
+                                    {...formik.getFieldProps('confirmPassword')}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                /> 
+                            </>
+                    }
+                </div>
                 <div className = "flex items-center justify-between mb-6">
                     <button onClick={isRegister ? SignUp : SignIn} className = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                         {isRegister ? "Sign Up" : "Sign In"}
                     </button>
-                    <a className = "inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+                    {/* <a className = "inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
                         Forgot Password?
-                    </a>
+                    </a> */}
                 </div>
                 <div>
                     <button onClick={() => {setIsRegister(!isRegister)}} className='text-blue-500'>{isRegister ? "Existing user?" : "Don't have an account?"}</button>                  
