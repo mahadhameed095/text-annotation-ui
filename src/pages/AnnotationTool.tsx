@@ -39,20 +39,21 @@ const AnnotationTool = () => {
     useHotkeys('4', onChangeHandler('hateful', false));
 
     return ( 
-        <div className="px-16 container mx-auto mt-5">  
+        <div className="md:px-8 xl:px-16 container mx-auto sm:mt-6">  
             <div className="rounded-md shadow-lg">
             <div className="rounded-lg shadow-md border p-4">
                 <h1 className="uppercase font-bold text-lg my-3">Text</h1>
-                <p className="my-3 max-h-[40vh] overflow-y-auto">{data}</p>
+                <p className="my-2 max-h-[40vh] overflow-y-auto">{data}</p>
             </div>
     
-            <div className="shadow-md space-y-3 p-4">
+            <div className="shadow-md p-4">
                 <h1 className="uppercase font-bold text-lg my-4">Annotation</h1>
     
                 <h2 className="font-semibold text-md mb-1">Religion</h2>
                 <div className="pl-4 space-x-3">
                 <label>
                     <input
+              
                     type="radio"
                     name="religious-belief"
                     value="islamic"
@@ -73,7 +74,7 @@ const AnnotationTool = () => {
                 </label>
                 </div>
     
-                <h2 className="font-semibold text-md mb-1">Tone</h2>
+                <h2 className="pt-4 font-semibold text-md mb-1">Tone</h2>
                 <div className="pl-4 space-x-2">
                 <label>
                     <input
@@ -97,7 +98,7 @@ const AnnotationTool = () => {
                 </label>
                 </div>
                 <button
-                className="my-2 p-2 uppercase rounded-md text-sm bg-slate-900 text-white"
+                className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white"
                 disabled={annotation.hateful === null || annotation.islamic === null}
                 onClick={onSubmit}
                 >
