@@ -1,5 +1,5 @@
-import AnnotationTool  from "../pages/AnnotationTool";
-import Home from "../pages/Home";
+import AnnotationTool  from "./pages/AnnotationTool";
+import Home from "./pages/Home";
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 export default function App() {
