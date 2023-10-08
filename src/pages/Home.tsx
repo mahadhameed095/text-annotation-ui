@@ -56,7 +56,9 @@ const annotation_detailed_data = [
 
 const Home = () => {
     const [user, setUser] = useState<typeof auth.currentUser>(null);
-    const COLORS = ["#8884d8", "#82ca9d"]
+    const INNER_COLORS = ["#82ca9d", "#8884d8"]
+    const OUTER_COLORS = ["#82ca9d", "#8884d8", "#808080"]
+    const OUTER_ANNOTATION_COLORS = ["#82ca9d", "#db0909"]
 
     onAuthStateChanged(auth, (user) => {
         console.log(user);
@@ -94,23 +96,34 @@ const Home = () => {
         </header>
         <div className='container mx-auto p-8'>
             <h2 className="text-lg font-style: italic">Hello {auth.currentUser?.email}!</h2>
-            <div className='mt-8 md:flex'>
-                <PieChart width={420} height={420}>
-                    <Pie style={{outline: 'none'}} labelLine={false} data={document_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8"  label={(props) => renderCustomizedLabel({...props, type: "1"})}>
-                        {document_data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                    </Pie>
-                    <Pie style={{outline: 'none'}} label={renderLabel}  data={document_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={124} outerRadius={144} fill="#db0909" endAngle={document_data[0].value / (document_data[0].value + document_data[1].value) * 360}/>
-                </PieChart>
-                <PieChart width={420} height={420}>
-                    <Pie style={{outline: 'none'}} labelLine={false} data={annotation_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label={(props) => renderCustomizedLabel({...props, type: "2"})}>
-                        {annotation_data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                    </Pie>
-                    <Pie style={{outline: 'none'}} label={renderLabel}  data={annotation_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={124} outerRadius={144} fill="#db0909" endAngle={annotation_data[0].value / (annotation_data[0].value + annotation_data[1].value) * 360}/>
-                </PieChart>
+            <div className='mt-8'>
+                <h2 className='text-xl font-bold'>Statistics</h2>
+                <div className='md:flex'>
+                    <PieChart width={420} height={420}>
+                        <Pie style={{outline: 'none'}} labelLine={false} data={document_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8"  label={(props) => renderCustomizedLabel({...props, type: "1"})}>
+                            {document_data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={INNER_COLORS[index % INNER_COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Pie style={{outline: 'none'}} label={renderLabel}  data={document_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={124} outerRadius={144} endAngle={document_data[0].value / (document_data[0].value + document_data[1].value) * 360}>
+                            {document_data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={OUTER_COLORS[index % OUTER_COLORS.length]} />
+                            ))}
+                        </Pie>
+                    </PieChart>
+                    <PieChart width={420} height={420}>
+                        <Pie style={{outline: 'none'}} labelLine={false} data={annotation_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label={(props) => renderCustomizedLabel({...props, type: "2"})}>
+                            {annotation_data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={INNER_COLORS[index % INNER_COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Pie style={{outline: 'none'}} label={renderLabel}  data={annotation_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={124} outerRadius={144} fill="#db0909" endAngle={annotation_data[0].value / (annotation_data[0].value + annotation_data[1].value) * 360}>
+                            {annotation_data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={OUTER_ANNOTATION_COLORS[index % OUTER_ANNOTATION_COLORS.length]} />
+                            ))}
+                        </Pie>
+                    </PieChart>
+                </div>
             </div>
         </div>
         </>
