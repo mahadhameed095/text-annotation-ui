@@ -1,21 +1,33 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { Auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { auth } from '../../firebase-config';
 import { useNavigate } from 'react-router-dom';
-import { useState }  from 'react';
+import { useState, useEffect }  from 'react';
+import { toFormikValidationSchema } from 'zod-formik-adapter';
 
-const validationSchema = z.object({
+const Schema = z.object({
     email: z.string().email(),
     name: z.string(),
     password: z.string().min(4),
     confirmPassword: z.string().min(4),
-  })
-
+});
 
 const Authentication = () => {
-    const [isRegister, setIsRegister] = useState(true);
+    const [isRegister, setIsRegister] = useState<Boolean>(false);
     const navigate = useNavigate();
+    // const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // useEffect(() => {
+    //     onAuthStateChanged(auth, async (user) => {
+    //         setIsAuthenticated(!!user);
+    //     });
+    // }, [])
+
+    // const SignOut = (auth: Auth) => {
+    //     signOut(auth);
+    //     navigate("/");
+    // }
 
     const formik = useFormik({
         initialValues: {
@@ -24,14 +36,15 @@ const Authentication = () => {
               password: '',
               confirmPassword: ''
           },
-          validationSchema : validationSchema,
+          validationSchema: toFormikValidationSchema(Schema),
           onSubmit: (values) => {
-              //do something
+            console.log("meow");
           },
       });
 
     const SignUp = () => 
     {
+          console.log("meow");
           formik.handleSubmit();
           createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
               console.log("sign up successful");
@@ -41,10 +54,11 @@ const Authentication = () => {
           .catch((err) => {
               console.log(err);
           })
-    }
+    };
   
     const SignIn = () =>
     {
+        console.log("meow");
         formik.handleSubmit();
         signInWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
             if (response) {
@@ -60,13 +74,13 @@ const Authentication = () => {
             else if (err.code == "auth/user-not-found")
                 formik.setErrors({"email": "User not found"})
         })
-      }
+    };
   
     const GoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider);
         navigate("/")
-    }
+    };
 
     return ( 
         <div className="bg-gray-100 container flex h-screen">
@@ -111,13 +125,16 @@ const Authentication = () => {
                         /> 
                 </div>
 
-                <div className = "flex items-center justify-between mb-2">
-                    <button className = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                <div className = "flex items-center justify-between mb-6">
+                    <button onClick={isRegister ? SignUp : SignIn} className = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                         {isRegister ? "Sign Up" : "Sign In"}
                     </button>
                     <a className = "inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
                         Forgot Password?
                     </a>
+                </div>
+                <div>
+                    <button onClick={() => {setIsRegister(!isRegister)}} className='text-blue-500'>{isRegister ? "Existing user?" : "Don't have an account?"}</button>                  
                 </div>
             </div>
         </div>
