@@ -87,14 +87,15 @@ const Home = () => {
                     results.data.forEach((row: any, index: any) => {
                         setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
                     });
-                  } else {
+                  } 
+                  else {
                     console.log('CSV file is empty');
                   }
                 },
                 header: true, // Set this to true if your CSV file has a header row
             });
         }
-        e.target.value = '';
+        e.target ? e.target.value = '' : null;
     }
 
 
@@ -114,13 +115,13 @@ const Home = () => {
                     <div className='w-full md:w-6/12 lg:w-96'>
                         <ResponsiveContainer width="100%" height={400}>
                             <PieChart>
-                                <Pie style={{outline: 'none'}} labelLine={false} data={document_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={115} fill="#8884d8"  label={(props) => renderCustomizedLabel({...props, type: "1"})}>
-                                    {document_data.map((entry, index) => (
+                                <Pie style={{outline: 'none'}} labelLine={false} data={document_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={115} fill="#8884d8" label={(props) => renderCustomizedLabel({...props, type: "1"})}>
+                                    {document_data.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={INNER_COLORS[index % INNER_COLORS.length]} />
                                     ))}
                                 </Pie>
                                 <Pie style={{outline: 'none'}} label={renderLabel}  data={document_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={120} outerRadius={140} endAngle={document_data[0].value / (document_data[0].value + document_data[1].value) * 360}>
-                                    {document_data.map((entry, index) => (
+                                    {document_data.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={OUTER_COLORS[index % OUTER_COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -131,12 +132,12 @@ const Home = () => {
                         <ResponsiveContainer width="100%" height={400}>
                             <PieChart>
                                 <Pie style={{outline: 'none'}} labelLine={false} data={annotation_data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={115} fill="#8884d8" label={(props) => renderCustomizedLabel({...props, type: "2"})}>
-                                    {annotation_data.map((entry, index) => (
+                                    {annotation_data.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={INNER_COLORS[index % INNER_COLORS.length]} />
                                     ))}
                                 </Pie>
                                 <Pie style={{outline: 'none'}} label={renderLabel}  data={annotation_detailed_data} dataKey="value" cx="50%" cy="50%" innerRadius={120} outerRadius={140} fill="#db0909" endAngle={annotation_data[0].value / (annotation_data[0].value + annotation_data[1].value) * 360}>
-                                    {annotation_data.map((entry, index) => (
+                                    {annotation_data.map((_entry, index) => (
                                         <Cell key={`cell-${index}`} fill={OUTER_ANNOTATION_COLORS[index % OUTER_ANNOTATION_COLORS.length]} />
                                     ))}
                                 </Pie>

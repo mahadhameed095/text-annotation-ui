@@ -1,10 +1,10 @@
-import { Auth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { auth, db } from '../../firebase-config';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect }  from 'react';
+import { useState }  from 'react';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 
 const Schema = z.object({
@@ -39,7 +39,7 @@ const Authentication = () => {
           },
           validationSchema: toFormikValidationSchema(Schema),
           onSubmit: (values) => {
-            console.log("meow");
+            console.log(values);
           },
       });
 
