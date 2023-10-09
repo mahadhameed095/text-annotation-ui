@@ -24,6 +24,10 @@ type BaseEntry = {
     document : string;
 };
 
+type Nullable<T> = {
+    [K in keyof T] : null | T[K]
+};
+
 type AnnotatedEntry = BaseEntry & { annotation : Annotation };
 type AssignedEntry =  BaseEntry & { assignment : Assignment };
 type Entry = AssignedEntry | AnnotatedEntry;
@@ -32,16 +36,16 @@ const data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac 
 
 const AnnotationTool = () => {
 
-    const [annotation, setannotation] = useState<Annotation>({
+    const [annotation, setannotation] = useState<Nullable<Labels>>({
         islamic : null,
         hateful : null
     });
 
-    const onChangeHandler = (key : keyof Annotation, value : boolean) => {
+    const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
-            const newAnnotation : Annotation = {
-            ...annotation,
-            [key] : value,
+            const newAnnotation = {
+               ...annotation,
+                [key] : value,
             };
             setannotation(newAnnotation);
         };
@@ -49,21 +53,10 @@ const AnnotationTool = () => {
     
     const onSubmit = () => {
     /* send the annotation and some uuid */
-    // if(annotation.hateful === null || annotation.islamic === null) alert("cannot submit because null.");
-    // alert(JSON.stringify(annotation));
-
-        const colRef = collection(db, "documents");
-        getDocs(colRef).then((snapshot) => {
-            let documents: Entry[] = [];
-            
-            snapshot.docs.forEach((doc) => {
-                documents.push({
-                    document: doc.data()["document"], 
-                    id: doc.id,
-                })
-            })
-            console.log(documents);
-        })
+        if(annotation.hateful === null || annotation.islamic === null) 
+            alert("cannot submit because null.");
+        else
+            alert(JSON.stringify(annotation));
     }
 
     useHotkeys('enter', onSubmit);
