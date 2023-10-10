@@ -41,3 +41,15 @@ export type AssignedEntry = z.infer<typeof AssignedEntrySchema>;
 
 export const EntrySchema = z.intersection(BaseEntrySchema, z.union([_AnnotationWrapperSchema, _AssignmentWrapperSchema, z.object({})]));
 export type Entry = z.infer<typeof EntrySchema>;
+
+export type Nullable<T> = {
+    [K in keyof T] : null | T[K]
+};
+
+export function IsAssignedEntry(entry : Entry) : entry is AssignedEntry {
+    return 'assignment' in entry;
+}
+
+export function IsAnnotatedEntry(entry : Entry) : entry is AnnotatedEntry {
+    return 'annotation' in entry;
+}
