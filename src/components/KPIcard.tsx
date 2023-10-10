@@ -15,7 +15,7 @@ const colors = {
     black : "text-black-500",
 }
 
-const KPIcard = ({color, value, title}) => {
+const KPIcard = ({color, value, title} : Props) => {
     return (
         <div className={`bg-[#f7f7f7] w-60 h-60 p-3 m-2 rounded-lg shadow-xl border flex flex-col`}>
             <h2 className={`${colors[color as keyof typeof colors]} text-center text-4xl font-bold`}>{title}</h2>

@@ -1,7 +1,7 @@
 import Header from '../components/Header';
 import { useRef } from 'react';
 import Papa from 'papaparse';
-import { addDoc, setDoc, collection, doc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase-config';
 import KPIcard from '../components/KPIcard';
 
@@ -36,9 +36,9 @@ const Home = () => {
             <div className='mt-2'>
                 <div className="flex mb-2">
                     <h2 className='text-3xl'>Your Statistics</h2>
-                    {/* <button className='invisible lg:visible bg-blue-500 rounded p-2 text-white ml-auto' onClick={()=>{inputFile.current.click()}}>
+                    <button className='invisible lg:visible bg-blue-500 rounded p-2 text-white text-sm ml-auto' onClick={()=>{inputFile.current.click()}}>
                         Upload Documents<br></br> (admin only)<input type='file' id='file' onChange={uploadDocuments}  ref={inputFile} style={{display: 'none'}}/>
-                    </button> */}
+                    </button>
                 </div>
                 <div className='sm:flex'>
                     <KPIcard title={"Annotated"} color={"blue"} value={1427}></KPIcard>
