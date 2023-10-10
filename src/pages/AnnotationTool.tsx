@@ -1,137 +1,78 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useHotkeys } from 'react-hotkeys-hook'
-import { db } from "../../firebase-config";
-import { collection, doc, setDoc, getDocs } from "firebase/firestore";
-
-type Labels = { 
-    islamic : boolean; 
-    hateful : boolean;
-};
-
-type Annotation = {
-    labels : Labels;
-    timestamp : Date;
-    annotator : string;
-}
-
-type Assignment = {
-    anotator : string;
-    timestamp : Date;
-}
-
-type BaseEntry = {
-    id : string;
-    document : string;
-};
-
-type Nullable<T> = {
-    [K in keyof T] : null | T[K]
-};
-
-type AnnotatedEntry = BaseEntry & { annotation : Annotation };
-type AssignedEntry =  BaseEntry & { assignment : Assignment };
-type Entry = AssignedEntry | AnnotatedEntry;
+import { Entry, Labels, Nullable } from "../lib/Validation";
+import EntryUI from "../components/EntryUI";
+import { auth } from "../../firebase-config";
+import { entryManager } from "../lib/EntryManager";
 
 const data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ac fringilla elit. Proin dapibus lorem nec justo tristique, sed aliquet justo ullamcorper.";
 
 const AnnotationTool = () => {
-
-    const [annotation, setannotation] = useState<Nullable<Labels>>({
+    const entries= useRef<Entry[]>([]);
+    const [activeEntryIndex, setActiveEntryIndex] = useState<number>();
+    const labelsToSubmit = useRef<Nullable<Labels>>({
         islamic : null,
         hateful : null
-    });
+    }); 
 
-    const onChangeHandler = (key : keyof Labels, value : boolean) => {
-        return () => {
-            const newAnnotation = {
-               ...annotation,
-                [key] : value,
-            };
-            setannotation(newAnnotation);
-        };
-    }
+    const fetchEntries = async () => {
+        if(!auth.currentUser) return;
+        const annotatorId = auth.currentUser.uid;
+        try {
+            /* All past entries */
+            const annotatedEntries = await entryManager.GetAnnotatedEntries(annotatorId);
+            
+            /* All assigned entries that have not been annotated yet */
+            const assignedEntries = await entryManager.GetAssignedEntries(annotatorId);
+            
+            if(assignedEntries.length === 0) 
+                assignedEntries.push(...(await entryManager.PullEntries(annotatorId, 2)))
+            
+            if(assignedEntries.length === 0) alert("Couldnt pull any entries");
+            
+            entries.current = [...annotatedEntries, ...assignedEntries];
+            setActiveEntryIndex(annotatedEntries.length);
+        } catch (error) {
+          console.error('Error fetching entries:', error);
+        }
+    };
     
+    const onChange = (labels : Nullable<Labels>) => {
+        labelsToSubmit.current = labels;
+    }
     const onSubmit = () => {
-    /* send the annotation and some uuid */
-        if(annotation.hateful === null || annotation.islamic === null) 
+        const { hateful, islamic } = labelsToSubmit.current;
+        if(hateful === null || islamic === null) 
             alert("cannot submit because null.");
-        else
-            alert(JSON.stringify(annotation));
+        else{
+            alert(JSON.stringify({ hateful, islamic }));
+        }
     }
 
     useHotkeys('enter', onSubmit);
-    useHotkeys('1', onChangeHandler('islamic', true));
-    useHotkeys('2', onChangeHandler('islamic', false));
-    useHotkeys('3', onChangeHandler('hateful', true));
-    useHotkeys('4', onChangeHandler('hateful', false));
-
     return ( 
-        <div className="md:px-8 xl:px-16 container mx-auto sm:mt-6">  
-            <div className="rounded-md shadow-lg">
-            <div className="rounded-lg shadow-md border p-4">
-                <h1 className="uppercase font-bold text-lg my-3">Text</h1>
-                <p className="my-2 max-h-[40vh] overflow-y-auto">{data}</p>
-            </div>
-    
-            <div className="shadow-md p-4">
-                <h1 className="uppercase font-bold text-lg my-4">Annotation</h1>
-    
-                <h2 className="font-semibold text-md mb-1">Religion</h2>
-                <div className="pl-4 space-x-3">
-                <label>
-                    <input
-              
-                    type="radio"
-                    name="religious-belief"
-                    value="islamic"
-                    checked={annotation.islamic === true}
-                    onChange={onChangeHandler('islamic', true)}
-                    />
-                    Islamic <span>[1]</span>
-                </label>
-                <label>
-                    <input
-                    type="radio"
-                    name="religious-belief"
-                    value="non-islamic"
-                    checked={annotation.islamic === false}
-                    onChange={onChangeHandler('islamic', false)}
-                    />
-                    Non Islamic <span>[2]</span>
-                </label>
-                </div>
-    
-                <h2 className="pt-4 font-semibold text-md mb-1">Tone</h2>
-                <div className="pl-4 space-x-2">
-                <label>
-                    <input
-                    type="radio"
-                    name="tone-of-speech"
-                    value="hateful"
-                    checked={annotation.hateful === true}
-                    onChange={onChangeHandler('hateful', true)}
-                    />
-                    Hateful <span>[3]</span>
-                </label>
-                <label>
-                    <input
-                    type="radio"
-                    name="tone-of-speech"
-                    value="not-hateful"
-                    checked={annotation.hateful === false}
-                    onChange={onChangeHandler('hateful', false)}
-                    />
-                    Not Hateful <span>[4]</span>
-                </label>
-                </div>
+        <div className="px-8 xl:px-16 container mx-auto mt-6">  
+            <EntryUI 
+                entry={{
+                    id : "1023",
+                    text : data,
+                }} 
+                onChange={onChange}
+            />
+            <div className="space-x-2 mx-auto flex justify-center">
                 <button
-                className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white"
-                disabled={annotation.hateful === null || annotation.islamic === null}
-                onClick={onSubmit}
+                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
+                >&lt;&lt;</button>
+                <button
+                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
+                    disabled={labelsToSubmit.current.hateful === null || labelsToSubmit.current.islamic === null}
+                    onClick={onSubmit}
                 >
                     Submit <span>[enter]</span>
                 </button>
-            </div>
+                <button
+                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
+                >&gt;&gt;</button>
             </div>
         </div>
      );
