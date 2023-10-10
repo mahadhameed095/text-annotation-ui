@@ -89,7 +89,7 @@ const Authentication = () => {
                                     Name
                                 </label>
                                 <input
-                                    className='shadow w-full border rounded py-2 appearance-none'
+                                    className='shadow w-full border rounded px-2 py-2 appearance-none'
                                     {...formik.getFieldProps('name')}
                                     id="name"
                                     name="name"
@@ -102,7 +102,7 @@ const Authentication = () => {
                         Email
                     </label>
                     <input
-                        className='shadow w-full border rounded py-2 appearance-none'
+                        className='px-2 shadow w-full border rounded py-2 appearance-none'
                         {...formik.getFieldProps('email')}
                         type="email"
                         id="email"
@@ -114,7 +114,7 @@ const Authentication = () => {
                         Password
                     </label>
                         <input
-                                className='shadow w-full border rounded py-2 appearance-none'
+                                className='px-2 shadow w-full border rounded py-2 appearance-none'
                                 {...formik.getFieldProps('password')}
                                 id="password"
                                 name="password"
@@ -128,7 +128,7 @@ const Authentication = () => {
                                  Confirm Password
                                 </label>
                                 <input
-                                    className='shadow w-full border rounded py-2 appearance-none'
+                                    className='px-2 shadow w-full border rounded py-2 appearance-none'
                                     {...formik.getFieldProps('confirmPassword')}
                                     id="confirmPassword"
                                     name="confirmPassword"
