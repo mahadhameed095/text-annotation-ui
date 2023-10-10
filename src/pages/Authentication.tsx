@@ -17,18 +17,6 @@ const Schema = z.object({
 const Authentication = () => {
     const [isRegister, setIsRegister] = useState<Boolean>(false);
     const navigate = useNavigate();
-    // const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    // useEffect(() => {
-    //     onAuthStateChanged(auth, async (user) => {
-    //         setIsAuthenticated(!!user);
-    //     });
-    // }, [])
-
-    // const SignOut = (auth: Auth) => {
-    //     signOut(auth);
-    //     navigate("/");
-    // }
 
     const formik = useFormik({
         initialValues: {
@@ -67,7 +55,6 @@ const Authentication = () => {
   
     const SignIn = () =>
     {
-        console.log("meow");
         formik.handleSubmit();
         signInWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
             if (response) {

@@ -48,14 +48,24 @@ const annotation_detailed_data = [
     }
 ]
 
+interface LabelProps {
+    type: string,
+    cx: number,
+    cy: number, 
+    midAngle: number,
+    innerRadius: number,
+    outerRadius: number, 
+    percent: number,
+    index: number
+}
 
-const AdminStatisticsPie = (props: any) => {
+const AdminStatisticsPie = () => {
     const INNER_COLORS = ["#82ca9d", "#8884d8"]
     const OUTER_COLORS = ["#82ca9d", "#8884d8", "#808080"]
     const OUTER_ANNOTATION_COLORS = ["#82ca9d", "#db0909"]
 
     const RADIAN = Math.PI / 180;
-    const renderCustomizedLabel = ({ type, cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+    const renderCustomizedLabel = ({ type, cx, cy, midAngle, innerRadius, outerRadius, index }: LabelProps) => {
       const radius = innerRadius + (outerRadius - innerRadius) * 0.3;
       const x = cx + radius * Math.cos(-midAngle * RADIAN);
       const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -67,7 +77,7 @@ const AdminStatisticsPie = (props: any) => {
       );
     };
 
-    const renderLabel = (entry) => {
+    const renderLabel = (entry: { name: string; }) => {
         return entry.name;
     }
 
