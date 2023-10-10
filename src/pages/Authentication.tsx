@@ -1,5 +1,5 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { addDoc, setDoc, collection, doc } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { auth, db } from '../../firebase-config';
@@ -17,18 +17,6 @@ const Schema = z.object({
 const Authentication = () => {
     const [isRegister, setIsRegister] = useState<Boolean>(false);
     const navigate = useNavigate();
-    // const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    // useEffect(() => {
-    //     onAuthStateChanged(auth, async (user) => {
-    //         setIsAuthenticated(!!user);
-    //     });
-    // }, [])
-
-    // const SignOut = (auth: Auth) => {
-    //     signOut(auth);
-    //     navigate("/");
-    // }
 
     const formik = useFormik({
         initialValues: {
@@ -45,17 +33,20 @@ const Authentication = () => {
 
     const SignUp = () => 
     {
-          console.log("meow");
           formik.handleSubmit();
+
           createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
               console.log("sign up successful");
-              console.log(auth);
 
-              const colRef = collection(db, "users");
-              addDoc(colRef, {
+              setDoc(doc(db, "users", auth.currentUser.uid), {
                 email: formik.values.email,
                 name: formik.values.name
-              }).then(() => navigate("/"))
+              })
+              .then(() => navigate("/"))
+              .catch((e) => {
+                console.log(e);
+                deleteUser(auth.currentUser);
+              })
           })
           .catch((err) => {
               console.log(err);
@@ -64,7 +55,6 @@ const Authentication = () => {
   
     const SignIn = () =>
     {
-        console.log("meow");
         formik.handleSubmit();
         signInWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
             if (response) {
@@ -99,7 +89,7 @@ const Authentication = () => {
                                     Name
                                 </label>
                                 <input
-                                    className='shadow w-full border rounded py-2 appearance-none'
+                                    className='shadow w-full border rounded px-2 py-2 appearance-none'
                                     {...formik.getFieldProps('name')}
                                     id="name"
                                     name="name"
@@ -112,7 +102,7 @@ const Authentication = () => {
                         Email
                     </label>
                     <input
-                        className='shadow w-full border rounded py-2 appearance-none'
+                        className='px-2 shadow w-full border rounded py-2 appearance-none'
                         {...formik.getFieldProps('email')}
                         type="email"
                         id="email"
@@ -124,7 +114,7 @@ const Authentication = () => {
                         Password
                     </label>
                         <input
-                                className='shadow w-full border rounded py-2 appearance-none'
+                                className='px-2 shadow w-full border rounded py-2 appearance-none'
                                 {...formik.getFieldProps('password')}
                                 id="password"
                                 name="password"
@@ -138,7 +128,7 @@ const Authentication = () => {
                                  Confirm Password
                                 </label>
                                 <input
-                                    className='shadow w-full border rounded py-2 appearance-none'
+                                    className='px-2 shadow w-full border rounded py-2 appearance-none'
                                     {...formik.getFieldProps('confirmPassword')}
                                     id="confirmPassword"
                                     name="confirmPassword"
