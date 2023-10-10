@@ -31,7 +31,7 @@ const Header = () => {
             </div>
             <div className="pr-4 md:pr-12 flex">
                 <Link to="/tool">
-                    <button className="btn bg-white rounded shadow p-2 hover:bg-gray-200">Annotation Tool</button>
+                    <button className="btn bg-white w-48 h-14 text-xl rounded shadow p-2 hover:bg-gray-200">Annotation Tool</button>
                 </Link>
             </div>
         </header>

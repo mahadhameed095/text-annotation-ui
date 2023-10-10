@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import { setDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase-config';
 import KPIcard from '../components/KPIcard';
+import StatisticsBar from '../components/StatisticsBar';
 
 const Home = () => {
     const inputFile = useRef(null);
@@ -36,7 +37,7 @@ const Home = () => {
             <div className='mt-2'>
                 <div className="flex mb-2">
                     <h2 className='mx-auto sm:m-0 text-3xl mb-2'>Your Statistics</h2>
-                    <button className='hidden sm:block bg-blue-500 rounded p-2 text-white text-sm ml-auto' onClick={()=>{inputFile.current.click()}}>
+                    <button className='hidden sm:block bg-blue-500 rounded p-2 text-white ml-auto' onClick={()=>{inputFile.current.click()}}>
                         Upload Documents<br></br> (admin only)<input type='file' id='file' onChange={uploadDocuments}  ref={inputFile} style={{display: 'none'}}/>
                     </button>
                 </div>
@@ -50,6 +51,30 @@ const Home = () => {
                     <KPIcard title={"Islamic "} color={"green"} value={648}></KPIcard>
                     <KPIcard title={"Non-Islamic"} color={"yellow"} value={616}></KPIcard>
                     <KPIcard title={"Hate Speech"} color={"red"} value={223}></KPIcard>
+                </div>
+
+                <h2 className='text-center sm:text-left text-3xl mt-8 mb-4'>Graphs</h2>
+                <div className='lg:flex m-auto'>
+                    <StatisticsBar colors={["#16A34A", "#A16207"]} data={[
+                        {
+                            name : "islamic", 
+                            value : 480
+                        },
+                        {
+                            name : "non-islamic", 
+                            value : 417
+                        }
+                        ]}></StatisticsBar>
+                    <StatisticsBar colors={["#16A34A", "#DC2626"]} data={[
+                        {
+                            name : "non-hate", 
+                            value : 310
+                        },
+                        {
+                            name : "hate", 
+                            value : 96
+                        }
+                        ]}></StatisticsBar>
                 </div>
             </div>
         </div>
