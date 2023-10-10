@@ -54,7 +54,7 @@ const Home = () => {
                 </div>
 
                 <h2 className='text-center sm:text-left text-3xl mt-8 mb-4'>Graphs</h2>
-                <div className='lg:flex m-auto'>
+                <div className='lg:flex'>
                     <StatisticsBar colors={["#16A34A", "#A16207"]} data={[
                         {
                             name : "islamic", 
