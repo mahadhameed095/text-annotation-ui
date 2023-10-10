@@ -1,5 +1,5 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { addDoc, setDoc, collection, doc } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { auth, db } from '../../firebase-config';
@@ -45,17 +45,20 @@ const Authentication = () => {
 
     const SignUp = () => 
     {
-          console.log("meow");
           formik.handleSubmit();
+
           createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
               console.log("sign up successful");
-              console.log(auth);
 
-              const colRef = collection(db, "users");
-              addDoc(colRef, {
+              setDoc(doc(db, "users", auth.currentUser.uid), {
                 email: formik.values.email,
                 name: formik.values.name
-              }).then(() => navigate("/"))
+              })
+              .then(() => navigate("/"))
+              .catch((e) => {
+                console.log(e);
+                deleteUser(auth.currentUser);
+              })
           })
           .catch((err) => {
               console.log(err);
