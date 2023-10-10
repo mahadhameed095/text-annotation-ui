@@ -35,8 +35,8 @@ const Home = () => {
         <div className='mx-auto p-2 sm:p-6 lg:p-12'>
             <div className='mt-2'>
                 <div className="flex mb-2">
-                    <h2 className='text-3xl'>Your Statistics</h2>
-                    <button className='invisible lg:visible bg-blue-500 rounded p-2 text-white text-sm ml-auto' onClick={()=>{inputFile.current.click()}}>
+                    <h2 className='mx-auto sm:m-0 text-3xl mb-2'>Your Statistics</h2>
+                    <button className='hidden sm:block bg-blue-500 rounded p-2 text-white text-sm ml-auto' onClick={()=>{inputFile.current.click()}}>
                         Upload Documents<br></br> (admin only)<input type='file' id='file' onChange={uploadDocuments}  ref={inputFile} style={{display: 'none'}}/>
                     </button>
                 </div>
@@ -45,7 +45,7 @@ const Home = () => {
                     <KPIcard title={"Assigned"} color={"green"} value={123}></KPIcard>
                 </div>
 
-                <h2 className='text-3xl mt-8 mb-4'>Analysis Overview</h2>
+                <h2 className='text-center sm:text-left text-3xl mt-8 mb-4'>Analysis Overview</h2>
                 <div className='sm:flex'>
                     <KPIcard title={"Islamic "} color={"green"} value={648}></KPIcard>
                     <KPIcard title={"Non-Islamic"} color={"yellow"} value={616}></KPIcard>
