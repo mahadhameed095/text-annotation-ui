@@ -3,7 +3,7 @@ import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 
  
 const StatisticsBar = ({colors, data}) => {
     return ( 
-        <div className="max-w-md">
+        <div className="w-80 sm:w-96 mx-auto sm:mx-0">
             <ResponsiveContainer height={400}>
                 <BarChart data={data}>
                     <XAxis dataKey="name" />

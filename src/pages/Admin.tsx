@@ -38,10 +38,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ReactNode, useState } from "react"
+import { ReactNode, useRef, useState } from "react"
 import { entryManager } from "@/lib/EntryManager"
 import { useMutation } from "react-query"
 import { useToast } from "@/components/ui/use-toast";
+import Papa from 'papaparse';
+import { setDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase-config';
 
 type User = {
   name : string;
@@ -140,6 +143,28 @@ function QuickAssign({uids, options, trigger} : QuickAssignProps){
   );
 }
 
+
+const uploadDocuments = (e: Event, inputFile: any) => {
+  if (inputFile.current !== null) {
+      Papa.parse(inputFile.current.files[0], {
+          complete: (results) => {
+            if (results.data.length > 0) {
+              // Iterate through each row in the CSV file
+              results.data.forEach((row: any, index: any) => {
+                  setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
+              });
+            } 
+            else {
+              console.log('CSV file is empty');
+            }
+          },
+          header: true, // Set this to true if your CSV file has a header row
+      });
+  }
+  e.target ? e.target.value = '' : null;
+}
+
+
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "name",
@@ -175,6 +200,8 @@ export const columns: ColumnDef<User>[] = [
 
 
 export default function Admin() {
+  const inputFile = useRef(null);
+  
   const table = useReactTable({
     data : users,
     columns,
@@ -182,6 +209,7 @@ export default function Admin() {
   })
 
   return (
+    <>
     <Card className="max-w-[600px] mx-4 md:mx-auto border mt-16 shadow-md rounded-md">
       <CardHeader>
         <CardTitle>Annotators</CardTitle>
@@ -241,5 +269,19 @@ export default function Admin() {
         </Table>
       </CardContent>
     </Card>
+
+    <Card className="max-w-[600px] mx-4 md:mx-auto border mt-16 shadow-md rounded-md">
+    <CardHeader>
+        <CardTitle>Documents</CardTitle>
+        <CardDescription className="flex justify-between items-center">
+          Document Management Panel
+          <Button className='ml-1' onClick={()=>{inputFile.current.click()}}>
+              Upload Documents
+              <input type='file' id='file' onChange={(e) => uploadDocuments(e, inputFile)}  ref={inputFile} style={{display: 'none'}}/>
+          </Button>
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  </>
   )
 }

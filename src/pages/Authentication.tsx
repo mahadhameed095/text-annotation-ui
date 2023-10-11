@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { addDoc, setDoc, collection, doc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { auth, db } from '../../firebase-config';
@@ -38,14 +38,15 @@ const Authentication = () => {
           createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
               console.log("sign up successful");
 
-              setDoc(doc(db, "users", auth.currentUser.uid), {
+              setDoc(doc(db, "users", response.user.uid), {
                 email: formik.values.email,
-                name: formik.values.name
+                name: formik.values.name,
+                admin: false
               })
               .then(() => navigate("/"))
               .catch((e) => {
                 console.log(e);
-                deleteUser(auth.currentUser);
+                deleteUser(response.user);
               })
           })
           .catch((err) => {
@@ -79,7 +80,7 @@ const Authentication = () => {
     };
 
     return ( 
-        <div className="bg-gray-100 container flex h-screen">
+        <div className="bg-gray-100 flex h-[calc(100vh-70px)]">
             <div className='bg-white shadow-md rounded w-80 m-auto px-8 pt-6 pb-8'>
                 <div className='mb-4'>  
                     {

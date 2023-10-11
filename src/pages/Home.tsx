@@ -1,45 +1,30 @@
-import Header from '../components/Header';
-import { useRef } from 'react';
-import Papa from 'papaparse';
-import { setDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase-config';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../../firebase-config';
 import KPIcard from '../components/KPIcard';
 import StatisticsBar from '../components/StatisticsBar';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+
 
 const Home = () => {
-    const inputFile = useRef(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        onAuthStateChanged(auth, async (user) => {
+          setIsAuthenticated(Boolean(user));
+          !user ? navigate("/login") : ""
+        });
+      }, [])
 
-    const uploadDocuments = (e: Event) => {
-        console.log(inputFile)
-        if (inputFile.current !== null) {
-            Papa.parse(inputFile.current.files[0], {
-                complete: (results) => {
-                  if (results.data.length > 0) {
-                    // Iterate through each row in the CSV file
-                    results.data.forEach((row: any, index: any) => {
-                        setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
-                    });
-                  } 
-                  else {
-                    console.log('CSV file is empty');
-                  }
-                },
-                header: true, // Set this to true if your CSV file has a header row
-            });
-        }
-        e.target ? e.target.value = '' : null;
-    }
 
     return ( 
         <>
-        <Header></Header>
-        <div className='mx-auto p-2 sm:p-6 lg:p-12'>
-            <div className='mt-2'>
+        {isAuthenticated ?
+        <div className='mx-auto px-2 sm:px-6 lg:px-12'>
+            <div className='mt-2 sm:mt-1'>
                 <div className="flex mb-2">
                     <h2 className='mx-auto sm:m-0 text-3xl mb-2'>Your Statistics</h2>
-                    <button className='hidden sm:block bg-blue-500 rounded p-2 text-white ml-auto' onClick={()=>{inputFile.current.click()}}>
-                        Upload Documents<br></br> (admin only)<input type='file' id='file' onChange={uploadDocuments}  ref={inputFile} style={{display: 'none'}}/>
-                    </button>
                 </div>
                 <div className='sm:flex'>
                     <KPIcard title={"Annotated"} color={"blue"} value={1427}></KPIcard>
@@ -65,7 +50,7 @@ const Home = () => {
                             value : 417
                         }
                         ]}></StatisticsBar>
-                    <StatisticsBar colors={["#16A34A", "#DC2626"]} data={[
+                    <StatisticsBar colors={["#0082F6", "#DC2626"]} data={[
                         {
                             name : "non-hate", 
                             value : 310
@@ -77,7 +62,7 @@ const Home = () => {
                         ]}></StatisticsBar>
                 </div>
             </div>
-        </div>
+        </div> : ""}
         </>
      );
 }
