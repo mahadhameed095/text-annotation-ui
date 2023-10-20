@@ -2,13 +2,36 @@ import { useNavigate } from 'react-router-dom';
 import { auth } from '../../firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Overview } from '@/components/Overview';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from '@/lib/utils';
+
+
+const frameworks = [
+    {
+      value: "yesterday",
+      label: "Yesterday",
+    },
+    {
+      value: "last 7 days",
+      label: "Last 7 Days",
+    },
+    {
+      value: "last 30 days",
+      label: "Last 30 Days",
+    },
+  ]
 
 
 const Home = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [open, setOpen] = useState<boolean>(false);
+    const [value, setValue] = useState<string>("last 7 days")
     const navigate = useNavigate();
     
     useEffect(() => {
@@ -18,6 +41,51 @@ const Home = () => {
         });
       }, [])
 
+
+    const renderDropdown = () => {
+        return(
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-[200px] justify-between"
+                >
+                    {value
+                    ? frameworks.find((framework) => framework.value === value)?.label
+                    : "Select Period..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                <Command>
+                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandGroup>
+                    {frameworks.map((framework) => (
+                        <CommandItem
+                        key={framework.value}
+                        onSelect={(currentValue) => {
+                            console.log(currentValue)
+                            setValue(currentValue === value ? "" : currentValue)
+                            setOpen(false)
+                        }}
+                        >
+                        <Check
+                            className={cn(
+                            "mr-2 h-4 w-4",
+                            value === framework.value ? "opacity-100" : "opacity-0"
+                            )}
+                        />
+                        {framework.label}
+                        </CommandItem>
+                    ))}
+                    </CommandGroup>
+                </Command>
+                </PopoverContent>
+            </Popover> 
+        )      
+    }
 
     return ( 
         <>
@@ -94,8 +162,11 @@ const Home = () => {
             </div>
             <div className="py-4 sm:grid sm:gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">
-                  <CardHeader>
+                  <CardHeader className='flex-row'>
                     <CardTitle>Overview</CardTitle>
+                    <div className='ml-auto'>
+                        {renderDropdown()}
+                    </div>
                   </CardHeader>
                   <CardContent className="pl-2">
                     <Overview />
@@ -103,10 +174,15 @@ const Home = () => {
                 </Card>
                 <Card className="col-span-3 sm:mt-0 mt-2">
                   <CardHeader>
-                    <CardTitle>Some Cool Shit</CardTitle>
+                    <CardTitle>Overall Progress (All Annotators)</CardTitle>
                   </CardHeader>
                   <CardContent className="pl-2">
-   
+                    <div className='p-4'>
+                        <div className='pb-4'>
+                            <CardDescription>Annotation Tasks Completed</CardDescription>
+                            <Progress value={51} />
+                        </div>
+                    </div>
                   </CardContent>
                 </Card>
             </div>

@@ -40,6 +40,11 @@ const AnnotationTool = () => {
     const onChange = (labels : Nullable<Labels>) => {
         labelsToSubmit.current = labels;
     }
+
+    const checkDisabled = () => {
+        return labelsToSubmit.current.hateful === null || labelsToSubmit.current.islamic === null
+    }
+
     const onSubmit = () => {
         const { hateful, islamic } = labelsToSubmit.current;
         if(hateful === null || islamic === null) 
@@ -51,29 +56,16 @@ const AnnotationTool = () => {
 
     useHotkeys('enter', onSubmit);
     return ( 
-        <div className="px-8 xl:px-16 container mx-auto mt-6">  
+        <div className="container px-6 lg:px-20 mx-auto mt-4">  
             <EntryUI 
                 entry={{
                     id : "1023",
                     text : data,
                 }} 
                 onChange={onChange}
+                onSubmit={onSubmit}
+                checkDisabled={checkDisabled}
             />
-            <div className="space-x-2 mx-auto flex justify-center">
-                <button
-                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
-                >&lt;&lt;</button>
-                <button
-                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
-                    disabled={labelsToSubmit.current.hateful === null || labelsToSubmit.current.islamic === null}
-                    onClick={onSubmit}
-                >
-                    Submit <span>[enter]</span>
-                </button>
-                <button
-                    className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
-                >&gt;&gt;</button>
-            </div>
         </div>
      );
 }

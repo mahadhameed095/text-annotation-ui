@@ -5,19 +5,25 @@ import Home from "./pages/Home";
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import Header from "./components/Header";
+import { userContext } from "./context";
+import { useState } from "react";
 
 export default function App() {
+  const [user, setUser] = useState({});
+
   return (
-    <Router>
-        <Header></Header>
-        <Routes>
-          <Route path="/" element={<Home/>} /> 
-          <Route path="/login" element={<Authentication/>} /> 
-          <Route path="/tool" element={<AnnotationTool/>} /> 
-          <Route path="/admin" element={<Admin/>} />
-          <Route path="*" element={<Home/>} />  
-        </Routes>
-        <Toaster/>
-    </Router>
+    <userContext.Provider value={{user, setUser}}>
+      <Router>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home/>} /> 
+            <Route path="/login" element={<Authentication/>} /> 
+            <Route path="/tool" element={<AnnotationTool/>} /> 
+            <Route path="/admin" element={<Admin/>} />
+            <Route path="*" element={<Home/>} />  
+          </Routes>
+          <Toaster/>
+      </Router>
+    </userContext.Provider>
   )
 }
