@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+model Document {
+  id      Int       @id @default(autoincrement())
+  text    String    @db.Text
+  metadata Json
+  annotations Annotation[]
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id    Int      @id @default(autoincrement())
+  name  String
+  email String   @unique
+  password String
+  role  Role   @default(USER)
+  annotations Annotation[]
+}
+
+model Annotation {
+  id                  Int         @id @default(autoincrement())
+  documentId          Int
+  value               Json?
+  annotatorId         Int?
+  annotationTimestamp DateTime?
+  assignmentTimestamp DateTime?
+
+  document            Document    @relation(fields: [documentId], references: [id])
+  annotator           User?       @relation(fields: [annotatorId], references: [id])
+}
+
+generator zod {
+  provider                         = "zod-prisma-types"
+  writeBarrelFiles                 = false // default is true
+  createInputTypes                 = false // default is true
+  addInputTypeValidation           = false // default is true
+  addIncludeType                   = false // default is true
+  addSelectType                    = false // default is true
+}
