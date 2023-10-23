@@ -36,3 +36,18 @@ export const EnvSchemaWithTransform = z.object({
 
 export type Env = z.infer<typeof EnvSchema>;
 export type EnvTransformed = z.infer<typeof EnvSchemaWithTransform>;
+
+export const ValueSchema = z.object({
+    hateful : z.boolean(),
+    islamic : z.boolean()
+});
+
+export const ValueCountsSchema = z.object({
+    hateful : z.coerce.number().int(),
+    non_hateful : z.coerce.number().int(),
+    islamic : z.coerce.number().int(),
+    non_islamic : z.coerce.number().int(),
+});
+
+export type Value = z.infer<typeof ValueSchema>;
+export type ValueCounts = z.infer<typeof ValueCountsSchema>;
