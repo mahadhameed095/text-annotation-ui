@@ -1,6 +1,6 @@
 import Env from '../ENV';
 import prismaClient from '../prisma';
-import { AssignedAnnotation, User } from '../schemas';
+import { AssignedAnnotation, User, ValueCounts } from '../schemas';
 import { Annotation, Prisma } from '@prisma/client';
 
 export async function submitAnnotation(
@@ -89,4 +89,32 @@ export async function getPastAnnotated(annotatorId : number, limit ?: number){
         orderBy : { annotationTimestamp : 'desc'}
     });
     return assigned;
+}
+
+export async function getCounts(annotatorId : number){
+    const q = Prisma.sql`
+        SELECT
+            SUM(CASE WHEN "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
+            SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
+            SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
+            SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
+            SUM(CASE WHEN "value"->>'islamic' = 'false' THEN 1 ELSE 0 END) AS non_islamic
+        FROM "Annotation"
+        WHERE "annotatorId" = ${annotatorId};
+    `;
+    return (await prismaClient.$queryRaw<ValueCounts[]>(q))[0];
+}
+
+export async function getAnnotatedCountOverTime(annotatorId : number, days : number){
+    const q = Prisma.sql`
+        SELECT
+            date_trunc('day', "annotationTimestamp") AS day,
+            COUNT(*) AS count
+        FROM "Annotation"
+        WHERE "annotatorId" = 1
+            AND "annotationTimestamp" >= CURRENT_TIMESTAMP - INTERVAL '${days} days'
+        GROUP BY day
+        ORDER BY day;
+    `;
+    return await prismaClient.$queryRaw<{day : string, count : BigInt}[]>(q);
 }

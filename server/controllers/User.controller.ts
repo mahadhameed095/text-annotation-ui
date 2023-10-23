@@ -2,6 +2,8 @@ import { initServer } from "@ts-rest/express";
 import { UserContract } from "../contracts";
 import { UserService } from "../service";
 import { encrypt, generateToken, removeKeyFromObject } from "../utils";
+import { AdminOnly, Auth } from "../middleware";
+import prismaClient from "../prisma";
 
 const server = initServer();
  
@@ -31,6 +33,15 @@ const UserController = server.router(UserContract, {
         status : 200,
         body : {...userPasswordRemoved, token}
       };
+    },
+    listAll : {
+      middleware : [Auth, AdminOnly as any],
+      handler : async ({ query }) => {
+        const users = await prismaClient.user.findMany({
+          ...query
+        });
+        return { status : 200, body : users }
+      }
     }
 });
 

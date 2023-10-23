@@ -9,6 +9,7 @@ datasource db {
   provider = "postgres"
   url      = env("DATABASE_URL")
 }
+
 model Document {
   id      Int       @id @default(autoincrement())
   text    String    @db.Text

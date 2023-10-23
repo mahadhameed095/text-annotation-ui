@@ -12,7 +12,7 @@ const DocumentContract = c.router({
         },
         body: DocumentSchema
             .pick({ text : true, metadata : true}).array(),
-        summary : 'Add a document'
+        summary : 'Add a document (admin-only access)'
     },
 });
 
