@@ -1,7 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../../firebase-config';
-import { onAuthStateChanged } from 'firebase/auth';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Overview } from '@/components/Overview';
 import { Button } from '@/components/ui/button';
@@ -10,13 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
-
+import { User, Annotation } from "../../api.ts";
+import { userContext, userContextType } from '@/context';
 
 const frameworks = [
-    {
-      value: "yesterday",
-      label: "Yesterday",
-    },
     {
       value: "last 7 days",
       label: "Last 7 Days",
@@ -28,18 +23,22 @@ const frameworks = [
   ]
 
 
+const getStatistics = () => {
+  // Annotation.getPastAnnotations({
+
+  // })
+}  
+
 const Home = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
-    const [value, setValue] = useState<string>("last 7 days")
+    const [value, setValue] = useState<string>("last 7 days");
+    const {user} = useContext(userContext) as userContextType;
     const navigate = useNavigate();
     
     useEffect(() => {
-        onAuthStateChanged(auth, async (user) => {
-          setIsAuthenticated(Boolean(user));
-          !user ? navigate("/login") : ""
-        });
-      }, [])
+      user ? setIsAuthenticated(true) : navigate("/login");
+    }, [])
 
 
     const renderDropdown = () => {
@@ -113,7 +112,7 @@ const Home = () => {
                   <CardContent>
                     <div className="text-2xl font-bold">2147</div>
                     <p className="text-xs text-muted-foreground">
-                      +301 from last month
+                   
                     </p>
                   </CardContent>
                 </Card>
@@ -127,7 +126,7 @@ const Home = () => {
                   <CardContent>
                     <div className="text-2xl font-bold">1321</div>
                     <p className="text-xs text-muted-foreground">
-                      +101 from last month
+                   
                     </p>
                   </CardContent>
                 </Card>
@@ -141,7 +140,7 @@ const Home = () => {
                   <CardContent>
                     <div className="text-2xl font-bold">1495</div>
                     <p className="text-xs text-muted-foreground">
-                       +756 from last month
+                  
                     </p>
                   </CardContent>
                 </Card>
@@ -155,7 +154,7 @@ const Home = () => {
                   <CardContent>
                     <div className="text-2xl font-bold">429</div>
                     <p className="text-xs text-muted-foreground">
-                      +106 from last month
+                     
                     </p>
                   </CardContent>
                 </Card>

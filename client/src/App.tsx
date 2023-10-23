@@ -5,14 +5,22 @@ import Home from "./pages/Home";
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import Header from "./components/Header";
-import { userContext } from "./context";
+import { userContext, userType } from "./context";
 import { useState } from "react";
 
 export default function App() {
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState<userType | null>(null);
+
+  const login = (user: userType) => {
+    setUser(user);
+  };
+
+  const logout = () => {
+    setUser(null); // Clear user data, effectively logging the user out
+  };
 
   return (
-    <userContext.Provider value={{user, setUser}}>
+    <userContext.Provider value={{user, login, logout}}>
       <Router>
           <Header />
           <Routes>

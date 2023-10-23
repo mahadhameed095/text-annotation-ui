@@ -7,16 +7,14 @@ import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-import { Auth, signOut } from "firebase/auth"
-import { auth } from "../../firebase-config";
 import { useNavigate } from "react-router-dom"
+import { userContext, userContextType } from '@/context';
+import { useContext } from "react";
 
 type Props = {
     email: string,
@@ -25,10 +23,11 @@ type Props = {
 
 export function UserNav({email, name} : Props) {
     const navigate = useNavigate();
+    const {logout} = useContext(userContext) as userContextType;
 
-    const SignOut = (auth: Auth) => {
-        signOut(auth);
-        navigate("/login");
+    function SignOut() {
+      logout();
+      navigate("/login");
     } 
     
     return (
@@ -52,7 +51,7 @@ export function UserNav({email, name} : Props) {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <button onClick={() => SignOut(auth)}>
+            <button onClick={SignOut}>
                 Log out
             </button>
           </DropdownMenuItem>
