@@ -1,12 +1,13 @@
+import { createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { setDoc, doc } from 'firebase/firestore';
 import { z } from 'zod';
 import { useFormik } from 'formik';
+import { auth, db } from '../../firebase-config';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useState }  from 'react';
+import { useState }  from 'react';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { User } from "../../api";
-import { userContext, userContextType } from '@/context';
 
 const Schema = z.object({
     email: z.string().email(),
@@ -17,9 +18,7 @@ const Schema = z.object({
 
 const Authentication = () => {
     const [isRegister, setIsRegister] = useState<Boolean>(false);
-    const {login} = useContext(userContext) as userContextType;
     const navigate = useNavigate();
-
 
     const formik = useFormik({
         initialValues: {
@@ -37,49 +36,50 @@ const Authentication = () => {
     const SignUp = () => 
     {
           formik.handleSubmit();
-          User.register({
-            body: {
-                name: formik.values.name, 
-                password: formik.values.password, 
-                email: formik.values.email,  
-            }
-          }).then(({status, body}) => {
-            if (status == 201) {
-                login({
-                    id: body.id,
-                    name: body.name,
-                    email: body.email,
-                    role: body.role,
-                    token: body.token,
-                })
-            }
-            navigate("/");
+
+          createUserWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
+              console.log("sign up successful");
+
+              setDoc(doc(db, "users", response.user.uid), {
+                email: formik.values.email,
+                name: formik.values.name,
+                admin: false
+              })
+              .then(() => navigate("/"))
+              .catch((e) => {
+                console.log(e);
+                deleteUser(response.user);
+              })
+          })
+          .catch((err) => {
+              console.log(err);
           })
     };
   
     const SignIn = () =>
     {
         formik.handleSubmit();
-        User.login({
-            body: {
-                email: formik.values.email,
-                password: formik.values.password
+        signInWithEmailAndPassword(auth, formik.values.email, formik.values.password).then((response)=>{
+            if (response) {
+                console.log("sign in successful");
+                console.log(auth)
+                navigate("/");
             }
-        }).then(({status, body}) => {
-            console.log("body",body)
-            if (status == 200) {
-                login({
-                    id: body.id,
-                    name: body.name,
-                    email: body.email,
-                    role: body.role,
-                    token: body.token,
-                })
-            }
-            navigate("/");
-         })
+        })
+        .catch((err) => {
+            console.log(err.code);
+            if (err.code == "auth/wrong-password")
+                formik.setErrors({"password": "Incorrect password"})
+            else if (err.code == "auth/user-not-found")
+                formik.setErrors({"email": "User not found"})
+        })
     };
   
+    const GoogleSignIn = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider);
+        navigate("/")
+    };
 
     return ( 
         <div className="bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">
