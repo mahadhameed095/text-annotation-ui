@@ -43,6 +43,7 @@ export const ValueSchema = z.object({
 });
 
 export const ValueCountsSchema = z.object({
+    total: z.coerce.number().int(),
     hateful : z.coerce.number().int(),
     non_hateful : z.coerce.number().int(),
     islamic : z.coerce.number().int(),

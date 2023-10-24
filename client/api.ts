@@ -18,3 +18,4 @@ export const Annotation = initClient(Contracts.AnnotationContract, {
     baseHeaders : {}
 });
 
+export const { AnnotationContract, DocumentContract, UserContract } = Contracts

@@ -8,8 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
-import { User, Annotation } from "../../api.ts";
+import { User, Annotation, AnnotationContract } from "../../api.ts";
 import { userContext, userContextType } from '@/context';
+import { ClientInferResponseBody, ServerInferResponseBody, ServerInferResponses } from '@ts-rest/core';
 
 const frameworks = [
     {
@@ -23,18 +24,21 @@ const frameworks = [
   ]
 
 
+type AnnotationContractType = ClientInferResponseBody<typeof AnnotationContract['getAnnotatedCountOverTime'], 200> 
+
 type AnnotaterStatistics = {
   labels: {
     title: string,
     value: number
   }[]
+  performance : AnnotationContractType | undefined
 }
 
 interface bodyType {
   [index: string]: number;
 }
 
-type Props = {
+type getCatdDataProps = {
   status: number,
   body: bodyType
 }
@@ -47,43 +51,58 @@ const Home = () => {
     const [data, setData] = useState<AnnotaterStatistics | null>(null);
     const navigate = useNavigate();
     
+    function getCardData() {
+      if (user) {
+        return Annotation.getCountsAll({
+          headers: {
+            authorization: `Bearer ${user.token}`
+          }
+        }).then(({status, body}: getCatdDataProps) => {
+          if (status == 200) {
+            return {
+                labels: Object.keys(body).map((fieldName) => ({
+                  title: fieldName,
+                  value: body[fieldName]
+                })),
+            }
+          }
+        });
+      }
+    }
+
+
+    function getAnnotatedCountOverTime() {
+      if (user) {
+        return Annotation.getAnnotatedCountOverTime({
+          headers: {
+            authorization: `Bearer ${user.token}`
+          },
+          query: {
+            take: parseInt(value.match(/\d+/)[0], 10)
+          }
+        }).then(({status, body}) => {
+          if (status == 200) {
+            return body;
+          }
+        })
+      }   
+    }
+
     useEffect(() => {
       user ? setIsAuthenticated(true) : navigate("/login");
     }, [])
 
     useEffect(() => {
-      if (user) {
-        Annotation.getCountsAll({
-          headers: {
-            authorization: `Bearer ${user.token}`
-          }
-        }).then(({status, body}: Props) => {
-          if (status == 200) {
-            setData({
-                labels: Object.keys(body).map((fieldName) => ({
-                  title: fieldName,
-                  value: body[fieldName]
-                })),
-            })
-          }
-        });
-      }
-    }, [user])
+      Promise.all([
+        getCardData(),
+        getAnnotatedCountOverTime()
+      ]).then(([cardData, performanceData]) => {
+        if (cardData) {
+          setData({labels : cardData["labels"], performance: performanceData})
+        }
+      })
+    }, [value])
 
-    useEffect(() => {
-      if (user) {
-        Annotation.getAnnotatedCountOverTime({
-          headers: {
-            authorization: `Bearer ${user.token}`
-          },
-          query: {
-            take: 30
-          }
-        }).then(({status, body}) => {
-          console.log("meow",status, body)
-        })
-      }   
-    }, [user])
 
     const renderDropdown = () => {
         return(
@@ -198,7 +217,7 @@ const Home = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="pl-2">
-                    <Overview />
+                    <Overview data={data?.["performance"]}/>
                   </CardContent>
                 </Card>
                 <Card className="col-span-3 sm:mt-0 mt-2">
