@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Entry, IsAnnotatedEntry, Labels, Nullable } from "../lib/Validation";
+import { useEffect,  useState } from "react";
+import { Labels, Nullable } from "../lib/Validation";
 import { useHotkeys } from "react-hotkeys-hook";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
+import { ClientInferResponseBody } from "@ts-rest/core";
+import { AnnotationContract } from "api";
+
+
+type documentType = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 
 
 export default function EntryUI({ 
@@ -11,20 +16,18 @@ export default function EntryUI({
     onSubmit,
     checkDisabled
 } : { 
-    entry : Entry,
+    entry : documentType | null,
     onChange : (labels : Nullable<Labels>) => void;
     onSubmit : () => void;
     checkDisabled : () => boolean;
 }){
+    const [activeEntryIndex, setActiveEntryIndex] = useState<number>(0);
     const [labels, setlabels] = useState<Nullable<Labels>>({
         islamic : null,
         hateful : null
     });
     
-    useEffect(()=> {
-        if(IsAnnotatedEntry(entry)) setlabels(entry.annotation.labels);
-    }, [entry]);
-    
+
     const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
             const newLabels = {
@@ -34,6 +37,18 @@ export default function EntryUI({
             setlabels(newLabels);
             onChange(newLabels);
         };
+    }
+
+    const incrementActiveEntryIndex = () => {
+        if (activeEntryIndex < 9) {
+            setActiveEntryIndex(activeEntryIndex + 1);
+        }
+    }
+
+    const decrementActiveEntryIndex = () => {
+        if (activeEntryIndex > 0) {
+            setActiveEntryIndex(activeEntryIndex - 1);
+        }
     }
 
     useHotkeys('1', onChangeHandler('islamic', true));
@@ -46,17 +61,17 @@ export default function EntryUI({
         <Card className="basis-3/4">
             <CardHeader>
                 <div className="flex items-center">
-                    <Button variant="ghost">
+                    <Button variant="ghost" onClick={decrementActiveEntryIndex}>
                         &lt;
                     </Button>
-                    <h1 className="uppercase font-bold text-lg">Task #{entry.id}</h1>
-                    <Button variant="ghost">
+                    <h1 className="uppercase font-bold text-lg">Task #{entry?.[activeEntryIndex].document.id}</h1>
+                    <Button variant="ghost" onClick={incrementActiveEntryIndex}>
                         &gt;
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry.text}</p>
+                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry?.[activeEntryIndex].document.text}</p>
             </CardContent>
         </Card>
 

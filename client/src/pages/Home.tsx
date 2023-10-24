@@ -5,12 +5,12 @@ import { Overview } from '@/components/Overview';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
-import { User, Annotation, AnnotationContract } from "../../api.ts";
+import { Annotation, AnnotationContract } from "../../api.ts";
 import { userContext, userContextType } from '@/context';
-import { ClientInferResponseBody, ServerInferResponseBody, ServerInferResponses } from '@ts-rest/core';
+import { ClientInferResponseBody } from '@ts-rest/core';
 
 const frameworks = [
     {
