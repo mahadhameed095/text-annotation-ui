@@ -77,10 +77,10 @@ const Home = () => {
             authorization: `Bearer ${user.token}`
           },
           query: {
-            take: 7
+            take: 30
           }
         }).then(({status, body}) => {
-          console.log("meow",body)
+          console.log("meow",status, body)
         })
       }   
     }, [user])

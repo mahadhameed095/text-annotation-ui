@@ -26,6 +26,7 @@ export function UserNav({email, name} : Props) {
     const {logout} = useContext(userContext) as userContextType;
 
     function SignOut() {
+      console.log("logging out..")
       logout();
       navigate("/login");
     } 
@@ -50,10 +51,8 @@ export function UserNav({email, name} : Props) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <button onClick={SignOut}>
+          <DropdownMenuItem onClick={() => SignOut()}>
                 Log out
-            </button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
