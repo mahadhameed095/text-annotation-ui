@@ -1,70 +1,24 @@
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { AnnotationContract } from "api";
-import { Bar, BarChart, LineChart, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 
 type AnnotationContractType = ClientInferResponseBody<typeof AnnotationContract['getAnnotatedCountOverTime'], 200> 
-
-// const data = [
-//   {
-//     name: "Jan",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Feb",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Mar",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Apr",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "May",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Jun",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Jul",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Aug",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Sep",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Oct",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Nov",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-//   {
-//     name: "Dec",
-//     total: Math.floor(Math.random() * 5000) + 1000,
-//   },
-// ]
 
 interface Props {
   data: AnnotationContractType | undefined
 }
 
 export function Overview({data} : Props) {
-  {console.log("brudda", data)}
+
+  const formattedData = data?.map((item) => ({
+    day: new Date(item.day).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }),
+    count: item.count,
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <LineChart data={formattedData}>
         <XAxis
           dataKey="day"
           stroke="#888888"

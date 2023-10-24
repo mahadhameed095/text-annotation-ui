@@ -1,4 +1,4 @@
-import {CollectionReference, DocumentData, collection, doc, getDocs, limit, orderBy, query, runTransaction, serverTimestamp, setDoc, where, writeBatch } from 'firebase/firestore';
+import {CollectionReference, DocumentData, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, where, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase-config';
 import { AnnotatedEntry, AnnotatedEntrySchema, Annotation, AssignedEntry, AssignedEntrySchema } from './Validation';
 
