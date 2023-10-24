@@ -23,23 +23,67 @@ const frameworks = [
   ]
 
 
-const getStatistics = () => {
-  // Annotation.getPastAnnotations({
+type AnnotaterStatistics = {
+  labels: {
+    title: string,
+    value: number
+  }[]
+}
 
-  // })
-}  
+interface bodyType {
+  [index: string]: number;
+}
+
+type Props = {
+  status: number,
+  body: bodyType
+}
 
 const Home = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useContext(userContext) as userContextType;
+    const [data, setData] = useState<AnnotaterStatistics | null>(null);
     const navigate = useNavigate();
     
     useEffect(() => {
       user ? setIsAuthenticated(true) : navigate("/login");
     }, [])
 
+    useEffect(() => {
+      if (user) {
+        Annotation.getCountsAll({
+          headers: {
+            authorization: `Bearer ${user.token}`
+          }
+        }).then(({status, body}: Props) => {
+          if (status == 200) {
+            setData({
+                labels: Object.keys(body).map((fieldName) => ({
+                  title: fieldName,
+                  value: body[fieldName]
+                })),
+            })
+          }
+        });
+      }
+    }, [user])
+
+    useEffect(() => {
+      if (user) {
+        Annotation.getAnnotatedCountOverTime({
+          headers: {
+            authorization: `Bearer ${user.token}`
+          },
+          query: {
+            take: 7
+          }
+        }).then(({status, body}) => {
+          console.log("meow",body)
+        })
+      }   
+    }, [user])
 
     const renderDropdown = () => {
         return(
@@ -86,6 +130,47 @@ const Home = () => {
         )      
     }
 
+    const renderCards = () => {
+      return(
+        <>
+        {
+          data ? data.labels.map((item) => (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {item["title"].charAt(0).toUpperCase() + item["title"].slice(1).toLowerCase()} Posts Annotated
+                  </CardTitle>
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{item["value"]}</div>
+                  <p className="text-xs text-muted-foreground">
+                  </p>
+                </CardContent>
+              </Card>
+          )) 
+          : 
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+              </CardTitle>
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold"></div>
+              <p className="text-xs text-muted-foreground">
+              </p>
+            </CardContent>
+          </Card>
+        }
+        </>
+      );
+    }
+
+    function getCols() {
+      return "lg:grid-cols-" + data?.labels.length;
+    }
+
     return ( 
         <>
         {isAuthenticated ?
@@ -101,63 +186,8 @@ const Home = () => {
                     </Button>
                 </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Posts Annotated
-                    </CardTitle>
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">2147</div>
-                    <p className="text-xs text-muted-foreground">
-                   
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Islamic Posts Identified
-                    </CardTitle>
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">1321</div>
-                    <p className="text-xs text-muted-foreground">
-                   
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                       Non-Islamic Posts Identified
-                    </CardTitle>
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">1495</div>
-                    <p className="text-xs text-muted-foreground">
-                  
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Hate Speech Identified
-                    </CardTitle>
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">429</div>
-                    <p className="text-xs text-muted-foreground">
-                     
-                    </p>
-                  </CardContent>
-                </Card>
+            <div className={`grid gap-4 md:grid-cols-3 ${getCols()}`}>
+              {renderCards()}
             </div>
             <div className="py-4 sm:grid sm:gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4">

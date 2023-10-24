@@ -7,6 +7,12 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
 	],
+  safelist: [
+    {
+        pattern: /grid-cols-./,
+        variants: ['lg']
+    }
+  ],
   theme: {
     container: {
       center: true,

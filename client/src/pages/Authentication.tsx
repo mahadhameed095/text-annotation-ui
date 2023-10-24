@@ -46,6 +46,7 @@ const Authentication = () => {
           }).then(({status, body}) => {
             if (status == 201) {
                 login({
+                    id: body.id,
                     name: body.name,
                     email: body.email,
                     role: body.role,
@@ -68,6 +69,7 @@ const Authentication = () => {
             console.log("body",body)
             if (status == 200) {
                 login({
+                    id: body.id,
                     name: body.name,
                     email: body.email,
                     role: body.role,
