@@ -10,7 +10,4 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv extends Env {}
   }
-
 }
-const meow = "";
-export { meow };

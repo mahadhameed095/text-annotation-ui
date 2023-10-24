@@ -111,10 +111,14 @@ export async function getAnnotatedCountOverTime(annotatorId : number, days : num
             date_trunc('day', "annotationTimestamp") AS day,
             COUNT(*) AS count
         FROM "Annotation"
-        WHERE "annotatorId" = 1
-            AND "annotationTimestamp" >= CURRENT_TIMESTAMP - INTERVAL '${days} days'
+        WHERE "annotatorId" = ${annotatorId}
+            AND "annotationTimestamp" >= CURRENT_TIMESTAMP - INTERVAL '1 days' * ${days}
         GROUP BY day
         ORDER BY day;
     `;
-    return await prismaClient.$queryRaw<{day : string, count : BigInt}[]>(q);
+    // console.log(q.inspect());
+    /* For some buggy reason, queryRaw returns one result when it should return 2. but unsafe works as expected. */
+    const results = await prismaClient.$queryRaw<{day : string, count : BigInt}[]>(q);
+    // console.log(results);
+    return results;
 }

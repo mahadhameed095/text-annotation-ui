@@ -37,9 +37,7 @@ const UserController = server.router(UserContract, {
     listAll : {
       middleware : [Auth, AdminOnly as any],
       handler : async ({ query }) => {
-        const users = await prismaClient.user.findMany({
-          ...query
-        });
+        const users = await UserService.getAllUsers(query.skip, query.take);
         return { status : 200, body : users }
       }
     }

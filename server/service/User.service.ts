@@ -10,3 +10,17 @@ export async function getUserByEmail(email : string) : Promise<User | null> {
     const user = await prismaClient.user.findFirst({ where : { email }});
     return user;
 }
+
+export async function getAllUsers(skip ?: number, take ?: number){
+    const users = await prismaClient.user.findMany({ 
+        skip,
+        take,
+        select : {
+            id : true,
+            name : true,
+            email : true,
+            role : true
+        }
+    });
+    return users;
+}
