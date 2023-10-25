@@ -7,19 +7,20 @@ import { useNavigate } from "react-router-dom";
 import { userContextType, userContext } from "@/context.ts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 
-type assignedAnnotationType = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
-type pastAnnotationType = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
+type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
+type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
+type UnwrapArray<T> = T extends (infer U)[] ? U : T;
 
-type Documents = {
-    history: pastAnnotationType,
-    tasks: assignedAnnotationType 
-}
+type assignedAnnotationType = UnwrapArray<assignedAnnotationTypeArray>;
+type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
+
+
 
 const AnnotationTool = () => {
     const {user} = useContext(userContext) as userContextType;
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
-    const data = useRef<Documents | null>(null);
+    const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
     const labelsToSubmit = useRef<Nullable<Labels>>({
         islamic : null,
         hateful : null
@@ -69,11 +70,9 @@ const AnnotationTool = () => {
             getHistory()
         ]).then(([tasks, history]) => {
             if (history && tasks) {
-                data.current = {
-                    history: history,
-                    tasks: tasks
-                }
-                setActiveEntryIndex(-1);
+                data.current = history.reverse()
+                data.current = data.current.concat(tasks)
+                setActiveEntryIndex(10);
             }
         })
       }, [])
@@ -87,27 +86,26 @@ const AnnotationTool = () => {
     }
 
     const incrementActiveEntryIndex = () => {
-        if (data.current && activeEntryIndex != null && activeEntryIndex > -1) {
-            console.log("setting index to",activeEntryIndex - 1)
-            setActiveEntryIndex(activeEntryIndex - 1);
+        if (data.current && activeEntryIndex != null) {
+            if ("value" in data.current[activeEntryIndex]) {
+                setActiveEntryIndex(activeEntryIndex + 1);
+            }
         }      
     }
 
     const decrementActiveEntryIndex = () => {
-        if (data.current && activeEntryIndex != null && activeEntryIndex < data.current?.history.length-1) {
-            console.log("setting index to",activeEntryIndex + 1)
-            setActiveEntryIndex(activeEntryIndex + 1);
+        if (data.current && activeEntryIndex != null && activeEntryIndex > 0) {
+            setActiveEntryIndex(activeEntryIndex - 1);
         }  
     }
 
     const onSubmit = () => {
         const { hateful, islamic } = labelsToSubmit.current;
-        const id = getCurrentEntry()?.id;
 
         if(hateful === null || islamic === null) 
             alert("cannot submit because null.");
         else{
-            if (data.current && user && id) {
+            if (data.current && user && activeEntryIndex) {
                 Annotation.submitAnnotation({
                     headers: {
                         authorization: `Bearer ${user.token}`
@@ -117,38 +115,33 @@ const AnnotationTool = () => {
                             hateful: hateful,
                             islamic: islamic
                         },
-                        id: id
+                        id: data.current[activeEntryIndex].id
                     } 
                 }).then(({status, body}) => {
                     console.log("submit", status, body);
+                    data.current[activeEntryIndex].value = {
+                        hateful: hateful,
+                        islamic: islamic
+                    }
                 })
             }
         }
     }
 
-    function getCurrentEntry() {
-        if (activeEntryIndex != null) {
-            if (activeEntryIndex == -1) {
-                return data.current?.tasks[0]
-            }
-            return data.current?.history[activeEntryIndex]
-        }
-    }
-
     useHotkeys('enter', () => console.log(data.current));
-    {console.log("re-render", "text: ", getCurrentEntry())} 
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4">  
+        {data.current && activeEntryIndex != null &&
             <EntryUI 
-                text={getCurrentEntry()?.document.text} 
-                id={getCurrentEntry()?.document.id} 
+                entry={data.current[activeEntryIndex]} 
                 onChange={onChange}
                 onSubmit={onSubmit}
                 checkDisabled={checkDisabled}
                 incrementActiveEntryIndex={incrementActiveEntryIndex}
                 decrementActiveEntryIndex={decrementActiveEntryIndex}
             />
+        }
         </div>
      );
 }

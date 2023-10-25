@@ -6,21 +6,22 @@ import { Button } from "./ui/button";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { AnnotationContract } from "api";
 
+type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
+type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
+type UnwrapArray<T> = T extends (infer U)[] ? U : T;
 
-type documentType = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
-
+type assignedAnnotationType = UnwrapArray<assignedAnnotationTypeArray>;
+type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 export default function EntryUI({ 
-    text,
-    id,
+    entry,
     onChange,
     onSubmit,
     incrementActiveEntryIndex,
     decrementActiveEntryIndex,
     checkDisabled
 } : { 
-    text : string | undefined,
-    id: number | undefined
+    entry : assignedAnnotationType | pastAnnotationType,
     onChange : (labels : Nullable<Labels>) => void;
     onSubmit : () => void;
     incrementActiveEntryIndex : () => void;
@@ -31,7 +32,26 @@ export default function EntryUI({
         islamic : null,
         hateful : null
     });
+    
+    useEffect(() => {
+        let newLabels;
+        if ("value" in entry) {
+            newLabels = {
+                hateful: entry.value["hateful"],
+                islamic: entry.value["islamic"],
+            }
+        }
+        else {
+            newLabels = {
+                islamic : null,
+                hateful : null
+            }       
+        }
+        setlabels(newLabels);
+        onChange(newLabels);     
+    }, [entry])
 
+    console.log("re-render")
 
     const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
@@ -43,9 +63,6 @@ export default function EntryUI({
             onChange(newLabels);
         };
     }
-
-
-
 
     useHotkeys('1', onChangeHandler('islamic', true));
     useHotkeys('2', onChangeHandler('islamic', false));
@@ -60,14 +77,14 @@ export default function EntryUI({
                     <Button variant="ghost" onClick={decrementActiveEntryIndex}>
                         &lt;
                     </Button>
-                    <h1 className="uppercase font-bold text-lg">Task #{id}</h1>
+                    <h1 className="uppercase font-bold text-lg">Task #{entry.id}</h1>
                     <Button variant="ghost" onClick={incrementActiveEntryIndex}>
                         &gt;
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{text}</p>
+                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry.document.text}</p>
             </CardContent>
         </Card>
 
