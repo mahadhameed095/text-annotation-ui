@@ -11,22 +11,27 @@ type documentType = ClientInferResponseBody<typeof AnnotationContract['getAssign
 
 
 export default function EntryUI({ 
-    entry,
+    text,
+    id,
     onChange,
     onSubmit,
+    incrementActiveEntryIndex,
+    decrementActiveEntryIndex,
     checkDisabled
 } : { 
-    entry : documentType | null,
+    text : string | undefined,
+    id: number | undefined
     onChange : (labels : Nullable<Labels>) => void;
     onSubmit : () => void;
+    incrementActiveEntryIndex : () => void;
+    decrementActiveEntryIndex : () => void;
     checkDisabled : () => boolean;
 }){
-    const [activeEntryIndex, setActiveEntryIndex] = useState<number>(0);
     const [labels, setlabels] = useState<Nullable<Labels>>({
         islamic : null,
         hateful : null
     });
-    
+
 
     const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
@@ -39,17 +44,8 @@ export default function EntryUI({
         };
     }
 
-    const incrementActiveEntryIndex = () => {
-        if (activeEntryIndex < 9) {
-            setActiveEntryIndex(activeEntryIndex + 1);
-        }
-    }
 
-    const decrementActiveEntryIndex = () => {
-        if (activeEntryIndex > 0) {
-            setActiveEntryIndex(activeEntryIndex - 1);
-        }
-    }
+
 
     useHotkeys('1', onChangeHandler('islamic', true));
     useHotkeys('2', onChangeHandler('islamic', false));
@@ -64,14 +60,14 @@ export default function EntryUI({
                     <Button variant="ghost" onClick={decrementActiveEntryIndex}>
                         &lt;
                     </Button>
-                    <h1 className="uppercase font-bold text-lg">Task #{entry?.[activeEntryIndex].document.id}</h1>
+                    <h1 className="uppercase font-bold text-lg">Task #{id}</h1>
                     <Button variant="ghost" onClick={incrementActiveEntryIndex}>
                         &gt;
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry?.[activeEntryIndex].document.text}</p>
+                <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{text}</p>
             </CardContent>
         </Card>
 
