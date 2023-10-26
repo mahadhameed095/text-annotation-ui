@@ -94,7 +94,7 @@ export async function getPastAnnotated(annotatorId : number, limit ?: number){
 export async function getCounts(annotatorId : number){
     const q = Prisma.sql`
         SELECT
-            SUM(CASE WHEN "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
+            SUM(CASE WHEN "value" != 'null' THEN 1 ELSE 0 END) AS total,
             SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
             SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
             SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
