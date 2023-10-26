@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { AnnotationContract } from "api";
+import { CheckCheck } from "lucide-react";
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -51,8 +52,6 @@ export default function EntryUI({
         onChange(newLabels);     
     }, [entry])
 
-    console.log("re-render")
-
     const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
             const newLabels = {
@@ -81,6 +80,12 @@ export default function EntryUI({
                     <Button variant="ghost" onClick={incrementActiveEntryIndex}>
                         &gt;
                     </Button>
+                    { "value" in entry &&
+                        <>
+                            <CheckCheck color="#087500" />
+                            <p className="text-green-800 font-bold">Annotated</p>
+                        </>
+                    }
                 </div>
             </CardHeader>
             <CardContent>

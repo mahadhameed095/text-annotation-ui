@@ -15,7 +15,6 @@ type assignedAnnotationType = UnwrapArray<assignedAnnotationTypeArray>;
 type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 
-
 const AnnotationTool = () => {
     const {user} = useContext(userContext) as userContextType;
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -117,18 +116,20 @@ const AnnotationTool = () => {
                         },
                         id: data.current[activeEntryIndex].id
                     } 
-                }).then(({status, body}) => {
-                    console.log("submit", status, body);
-                    data.current[activeEntryIndex].value = {
-                        hateful: hateful,
-                        islamic: islamic
+                }).then(({status}) => {
+                    if (status == 200) {
+                        data.current[activeEntryIndex].value = {
+                            hateful: hateful,
+                            islamic: islamic
+                        }
+                        incrementActiveEntryIndex();
                     }
                 })
             }
         }
     }
 
-    useHotkeys('enter', () => console.log(data.current));
+    useHotkeys('enter', onSubmit);
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4">  
