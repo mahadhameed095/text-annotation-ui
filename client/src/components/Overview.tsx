@@ -1,6 +1,6 @@
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { AnnotationContract } from "api";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
 
 type AnnotationContractType = ClientInferResponseBody<typeof AnnotationContract['getAnnotatedCountOverTime'], 200> 
@@ -25,6 +25,7 @@ export function Overview({data} : Props) {
           fontSize={12}
           tickLine={false}
         />
+        <Tooltip cursor={false}/>
         <YAxis
           stroke="#888888"
           fontSize={12}

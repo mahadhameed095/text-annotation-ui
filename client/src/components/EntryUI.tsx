@@ -73,13 +73,15 @@ export default function EntryUI({
         <Card className="basis-3/4">
             <CardHeader>
                 <div className="flex items-center">
-                    <Button variant="ghost" onClick={decrementActiveEntryIndex}>
-                        &lt;
-                    </Button>
-                    <h1 className="uppercase font-bold text-lg">Task #{entry.id}</h1>
-                    <Button variant="ghost" onClick={incrementActiveEntryIndex}>
-                        &gt;
-                    </Button>
+                    <div className="flex items-center px-1">
+                        <Button variant="ghost" onClick={decrementActiveEntryIndex}>
+                            &lt;&lt;
+                        </Button>
+                        <h1 className="uppercase font-bold text-lg w-32 text-center">Task #{entry.id}</h1>
+                        <Button variant="ghost" onClick={incrementActiveEntryIndex}>
+                            &gt;&gt;
+                        </Button>
+                    </div>
                     { "value" in entry &&
                         <>
                             <CheckCheck color="#087500" />

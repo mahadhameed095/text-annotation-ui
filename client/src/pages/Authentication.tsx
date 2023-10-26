@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { User } from "../../api";
 import { userContext, userContextType } from '@/context';
+import { useToast } from '@/components/ui/use-toast';
 
 const Schema = z.object({
     email: z.string().email(),
@@ -19,6 +20,7 @@ const Authentication = () => {
     const [isRegister, setIsRegister] = useState<Boolean>(false);
     const {login} = useContext(userContext) as userContextType;
     const navigate = useNavigate();
+    const { toast } = useToast();
 
 
     const formik = useFormik({
@@ -52,8 +54,15 @@ const Authentication = () => {
                     role: body.role,
                     token: body.token,
                 })
+                navigate("/");
             }
-            navigate("/");
+            else {
+                toast({
+                    variant: "destructive",
+                    title: "Signup Failed",
+                    description: body.message,
+                  })
+                }
           })
     };
   
@@ -75,8 +84,15 @@ const Authentication = () => {
                     role: body.role,
                     token: body.token,
                 })
+                navigate("/");
             }
-            navigate("/");
+            else {
+                toast({
+                    variant: "destructive",
+                    title: "Login Failed",
+                    description: body.message,
+                })
+            }
          })
     };
   
