@@ -31,6 +31,7 @@ const AnnotationTool = () => {
     }, [])
 
     function getTasks() {
+        console.log("getting tasks...")
         if (user) {
             return Annotation.getAssignedAnnotations({
                 headers: {
@@ -40,13 +41,29 @@ const AnnotationTool = () => {
                     take: 10
                 }
             }).then(({status, body}) => {
-                console.log("tool", status, body);
-                return body;
+                if (body.length < 5) {
+                    return Annotation.reserveAnnotation({
+                        headers: {
+                            authorization: `Bearer ${user.token}`
+                        },                        
+                    }).then(({status, body}) => {
+                        if (status == 200) {
+                            console.log("reserving tasks...")
+                            console.log("tool", status, body);
+                            return body
+                        }
+                    })
+                }
+                else { 
+                    console.log("tool", status, body);
+                    return body;
+                }
             })
         }
     }
     
     function getHistory() {
+        console.log("getting history...")
         if (user) {
             return Annotation.getPastAnnotations({
                 headers: {
@@ -68,10 +85,17 @@ const AnnotationTool = () => {
             getTasks(),
             getHistory()
         ]).then(([tasks, history]) => {
-            if (history && tasks) {
-                data.current = history.reverse()
-                data.current = data.current.concat(tasks)
-                setActiveEntryIndex(10);
+            console.log("tasks", tasks)
+            if (tasks) {
+                if (history) {
+                    data.current = history.reverse()
+                    data.current = data.current.concat(tasks)
+                    setActiveEntryIndex(history.length);
+                }
+                else {
+                    data.current = tasks
+                    setActiveEntryIndex(0);
+                }
             }
         })
       }, [])
@@ -86,6 +110,12 @@ const AnnotationTool = () => {
 
     const incrementActiveEntryIndex = () => {
         if (data.current && activeEntryIndex != null) {
+            if ((data.current.length-1) - activeEntryIndex < 3) {
+                console.log("fetching more docs....")
+                getTasks()?.then((new_tasks) => {
+                    data.current = data.current.concat(new_tasks)
+                })
+            }
             if ("value" in data.current[activeEntryIndex]) {
                 setActiveEntryIndex(activeEntryIndex + 1);
             }
@@ -104,7 +134,7 @@ const AnnotationTool = () => {
         if(hateful === null || islamic === null) 
             alert("cannot submit because null.");
         else{
-            if (data.current && user && activeEntryIndex) {
+            if (data.current && user && activeEntryIndex != null) {
                 Annotation.submitAnnotation({
                     headers: {
                         authorization: `Bearer ${user.token}`
@@ -131,9 +161,14 @@ const AnnotationTool = () => {
 
     useHotkeys('enter', onSubmit);
 
+    console.log("1", (data.current && activeEntryIndex != null && data.current[activeEntryIndex]));
+    console.log("2", (data.current && activeEntryIndex != null));
+    console.log("3", (activeEntryIndex != null && data.current[activeEntryIndex]));
+    console.log(data.current, activeEntryIndex);
+
     return (
-        <div className="container px-6 lg:px-20 mx-auto mt-4">  
-        {data.current && activeEntryIndex != null &&
+        <div className="container px-6 lg:px-20 mx-auto mt-4"> 
+        {data.current && activeEntryIndex != null && data.current[activeEntryIndex] &&
             <EntryUI 
                 entry={data.current[activeEntryIndex]} 
                 onChange={onChange}
