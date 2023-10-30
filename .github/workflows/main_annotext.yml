@@ -46,13 +46,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      - name: deployment(install, build, deploy)
-        run: |
-          cd server
-          npm install
-          npm run build
-          npm run deploy
-
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -61,3 +54,10 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7E712B0188E84EB7865ECBB8F336E2AE }}
           package: .
+      
+      - name: deployment(install, build, deploy)
+        run: |
+          cd server
+          npm install
+          npm run build
+          npm run deploy
