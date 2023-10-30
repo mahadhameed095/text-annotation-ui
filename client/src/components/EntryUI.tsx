@@ -89,6 +89,7 @@ export default function EntryUI({
                         </>
                     }
                 </div>
+                <div className="italic">Source: {entry.document.metadata.source}</div>
             </CardHeader>
             <CardContent>
                 <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry.document.text}</p>
