@@ -1,11 +1,11 @@
 import { useEffect,  useState } from "react";
-import { Labels, Nullable } from "../lib/Validation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
 import { ClientInferResponseBody } from "@ts-rest/core";
-import { AnnotationContract } from "api";
+import { AnnotationContract, Labels } from "api";
 import { CheckCheck } from "lucide-react";
+import { Nullable } from "@/lib/utils";
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -38,8 +38,8 @@ export default function EntryUI({
         let newLabels;
         if ("value" in entry) {
             newLabels = {
-                hateful: entry.value["hateful"],
-                islamic: entry.value["islamic"],
+                hateful: (entry.value as any)["hateful"],
+                islamic: (entry.value as any)["islamic"],
             }
         }
         else {

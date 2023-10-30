@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAsyncCallback } from 'react-async-hook';
 
-import { Input } from "@/components/ui/input"
+// import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 import {
@@ -39,13 +39,10 @@ import {
 } from "@/components/ui/table"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ReactNode, useRef, useState } from "react"
-import { entryManager } from "@/lib/EntryManager"
-import { useMutation } from "react-query"
+// import { entryManager } from "@/lib/EntryManager"
+// import { useMutation } from "react-query"
 import { useToast } from "@/components/ui/use-toast";
 import Papa from 'papaparse';
-import { setDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase-config';
-
 type User = {
   name : string;
   email :string;
@@ -86,7 +83,7 @@ function QuickAssign({uids, options, trigger} : QuickAssignProps){
   const { toast } = useToast();
   const mutator = useAsyncCallback(async () => {
     try{
-      const ids = uids === "all" ? [] : uids;
+      // const ids = uids === "all" ? [] : uids;
       await delay(3000);
       toast({
         description : `Assigned ${option} entries to ${uids}`
@@ -144,15 +141,15 @@ function QuickAssign({uids, options, trigger} : QuickAssignProps){
 }
 
 
-const uploadDocuments = (e: Event, inputFile: any) => {
+const uploadDocuments = (inputFile: any) => {
   if (inputFile.current !== null) {
       Papa.parse(inputFile.current.files[0], {
           complete: (results) => {
             if (results.data.length > 0) {
               // Iterate through each row in the CSV file
-              results.data.forEach((row: any, index: any) => {
-                  setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
-              });
+              // results.data.forEach((row: any, index: any) => {
+              //     // setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
+              // });
             } 
             else {
               console.log('CSV file is empty');
@@ -161,7 +158,7 @@ const uploadDocuments = (e: Event, inputFile: any) => {
           header: true, // Set this to true if your CSV file has a header row
       });
   }
-  e.target ? e.target.value = '' : null;
+  // e.target ? e.target.value = '' : null;
 }
 
 
@@ -188,7 +185,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey : "email",
     header: () => <div className="text-center">Add</div>,
-    cell : ({row}) => (
+    cell : () => (
       <QuickAssign
         options={[10, 50, 100, 250, 500]}
         uids={[]}
@@ -275,9 +272,9 @@ export default function Admin() {
         <CardTitle>Documents</CardTitle>
         <CardDescription className="flex justify-between items-center">
           Document Management Panel
-          <Button className='ml-1' onClick={()=>{inputFile.current.click()}}>
+          <Button className='ml-1' onClick={()=>{(inputFile.current as any).click()}}>
               Upload Documents
-              <input type='file' id='file' onChange={(e) => uploadDocuments(e, inputFile)}  ref={inputFile} style={{display: 'none'}}/>
+              <input type='file' id='file' onChange={() => uploadDocuments(inputFile)}  ref={inputFile} style={{display: 'none'}}/>
           </Button>
         </CardDescription>
       </CardHeader>

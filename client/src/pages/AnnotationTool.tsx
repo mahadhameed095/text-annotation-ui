@@ -1,11 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react"
 import { useHotkeys } from 'react-hotkeys-hook'
-import { Labels, Nullable } from "../lib/Validation";
 import EntryUI from "../components/EntryUI";
-import { Annotation, AnnotationContract } from "../../api.ts";
+import { Annotation, AnnotationContract, Labels } from "../../api.ts";
 import { useNavigate } from "react-router-dom";
 import { userContextType, userContext } from "@/context.ts";
 import { ClientInferResponseBody } from "@ts-rest/core";
+import { Nullable } from "@/lib/utils.ts";
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -17,7 +17,7 @@ type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 const AnnotationTool = () => {
     const {user} = useContext(userContext) as userContextType;
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
     const labelsToSubmit = useRef<Nullable<Labels>>({
@@ -113,7 +113,7 @@ const AnnotationTool = () => {
             if ((data.current.length-1) - activeEntryIndex < 3) {
                 console.log("fetching more docs....")
                 getTasks()?.then((new_tasks) => {
-                    data.current = data.current.concat(new_tasks)
+                    data.current = data.current.concat(new_tasks as any)
                 })
             }
             if ("value" in data.current[activeEntryIndex]) {
@@ -148,7 +148,8 @@ const AnnotationTool = () => {
                     } 
                 }).then(({status}) => {
                     if (status == 200) {
-                        data.current[activeEntryIndex].value = {
+
+                        (data.current[activeEntryIndex] as any).value = {
                             hateful: hateful,
                             islamic: islamic
                         }

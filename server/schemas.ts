@@ -1,7 +1,48 @@
 import { z } from "zod";
-import { AnnotationSchema, DocumentSchema, UserSchema } from "./prisma/generated/zod";
 
-export * from "./prisma/generated/zod";
+
+export const JsonSchema: z.ZodType = z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.record(z.string(), z.any()),
+    z.array(z.any()),
+]);
+
+export const ValueSchema = z.object({
+    hateful : z.boolean(),
+    islamic : z.boolean()
+});
+
+export const RoleSchema = z.enum(['ADMIN','USER']);
+
+export const UserSchema = z.object({
+    role: RoleSchema,
+    id: z.number().int(),
+    name: z.string(),
+    email: z.string(),
+    password: z.string(),
+});
+
+export type User = z.infer<typeof UserSchema>;
+
+export const AnnotationSchema = z.object({
+    id: z.number().int(),
+    documentId: z.number().int(),
+    value: ValueSchema.nullable(),
+    annotatorId: z.number().int().nullable(),
+    annotationTimestamp: z.coerce.date().nullable(),
+    assignmentTimestamp: z.coerce.date().nullable(),
+});
+export type Annotation = z.infer<typeof AnnotationSchema>;
+
+export const DocumentSchema = z.object({
+    id: z.number().int(),
+    text: z.string(),
+    metadata: JsonSchema,
+});
+export type Document = z.infer<typeof DocumentSchema>;
 
 export const UserWithoutPasswordSchema = UserSchema.omit({ password : true});
 export type UserWithoutPassword = z.infer<typeof UserWithoutPasswordSchema>;
@@ -36,11 +77,6 @@ export const EnvSchemaWithTransform = z.object({
 
 export type Env = z.infer<typeof EnvSchema>;
 export type EnvTransformed = z.infer<typeof EnvSchemaWithTransform>;
-
-export const ValueSchema = z.object({
-    hateful : z.boolean(),
-    islamic : z.boolean()
-});
 
 export const ValueCountsSchema = z.object({
     total: z.coerce.number().int(),

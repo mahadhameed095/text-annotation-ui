@@ -80,7 +80,7 @@ const Home = () => {
             authorization: `Bearer ${user.token}`
           },
           query: {
-            take: parseInt(value.match(/\d+/)[0], 10)
+            take: parseInt(value.match(/\d+/)![0], 10)
           }
         }).then(({status, body}) => {
           if (status == 200) {

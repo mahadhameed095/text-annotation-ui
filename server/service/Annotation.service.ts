@@ -57,7 +57,7 @@ export async function reserveAnnotations(annotatorId : User['id']){
     }); 
 }
 
-export async function getAssignedAnnotations(annotatorId : number, limit ?: number){
+export async function getAssignedAnnotations(annotatorId : number, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
             value : { equals : Prisma.AnyNull},
@@ -68,12 +68,12 @@ export async function getAssignedAnnotations(annotatorId : number, limit ?: numb
             assignmentTimestamp : true,
             document : true
         },
-        take : limit
+        take
     });
     return assigned;
 }
 
-export async function getPastAnnotated(annotatorId : number, limit ?: number){
+export async function getPastAnnotated(annotatorId : number, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
             value : { not : Prisma.JsonNull},
@@ -85,7 +85,7 @@ export async function getPastAnnotated(annotatorId : number, limit ?: number){
             value : true,
             document : true
         },
-        take : limit,
+        take,
         orderBy : { annotationTimestamp : 'desc'}
     });
     return assigned;
