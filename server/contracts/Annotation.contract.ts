@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { AnnotationSchema, DocumentSchema,AssignedAnnotationSchema, ValueCountsSchema } from "../schemas";
+import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema } from "../schemas";
 import { z } from "zod";
 
 const c = initContract();
@@ -9,7 +9,7 @@ const AnnotationContract = c.router({
         method : 'POST',
         path : '/submitAnnotation',
         body: z.object({
-                value : z.record(z.string(), z.any()),
+                value : ValueSchema,
                 id : z.number()
             }),
         responses:{
@@ -29,7 +29,7 @@ const AnnotationContract = c.router({
     getAssignedAnnotations : {
       method : 'GET',
       query : z.object({
-        take : z.coerce.number()
+        take : z.coerce.number().optional()
       }),
       path : '/getAssignedAnnotations',
       responses:{

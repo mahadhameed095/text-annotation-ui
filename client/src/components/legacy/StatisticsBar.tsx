@@ -6,7 +6,7 @@ type Props = {
     data: {
         name: string,
         value: number
-    }
+    }[]
 }
  
 const StatisticsBar = ({colors, data}: Props) => {
@@ -19,7 +19,7 @@ const StatisticsBar = ({colors, data}: Props) => {
                     <Tooltip />
                     <Bar dataKey="value">
                         {
-                            data.map((entry, index: number) => (
+                            data.map((_, index: number) => (
                                 <Cell key={`cell-${index}`} fill={colors[index % 20]} />
                             ))
                         }
