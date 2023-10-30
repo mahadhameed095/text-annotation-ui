@@ -46,6 +46,13 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
+      - name: deployment(install, build, deploy)
+        run: |
+          cd server
+          npm install
+          npm run build
+          npm run deploy
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
