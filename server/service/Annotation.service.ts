@@ -1,6 +1,7 @@
+import { z } from 'zod';
 import Env from '../ENV';
 import prismaClient from '../prisma';
-import { AssignedAnnotation, User, ValueCounts, ValueCountsWithId } from '../schemas';
+import { AssignedAnnotation, User, ValueCounts, ValueCountsSchema, ValueCountsWithId, ValueCountsWithIdSchema } from '../schemas';
 import { Annotation, Prisma } from '@prisma/client';
 
 export async function submitAnnotation(
@@ -102,7 +103,9 @@ export async function getCounts(annotatorId : number){
         FROM "Annotation"
         WHERE "annotatorId" = ${annotatorId};
     `;
-    return (await prismaClient.$queryRaw<ValueCounts[]>(q))[0];
+
+    /* The parsing is necessary as it will convert the bigints to regular numbers */
+    return ValueCountsSchema.parse((await prismaClient.$queryRaw<ValueCounts[]>(q))[0]);
 }
 
 export async function getCountsAllAnnotators(){
@@ -117,7 +120,24 @@ export async function getCountsAllAnnotators(){
     FROM "User" U LEFT JOIN "Annotation" A on U."id" = A."annotatorId"
     GROUP BY U."id";
     `;
-    return (await prismaClient.$queryRaw<ValueCountsWithId[]>(q));
+
+    /* The parsing is necessary as it will convert the bigints to regular numbers */
+    return ValueCountsWithIdSchema.array().parse((await prismaClient.$queryRaw<ValueCountsWithId[]>(q)));
+}
+
+export async function getTotalCounts(){
+    const q = Prisma.sql`
+        SELECT
+            SUM(CASE WHEN "value" != 'null' AND "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
+            SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
+            SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
+            SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
+            SUM(CASE WHEN "value"->>'islamic' = 'false' THEN 1 ELSE 0 END) AS non_islamic
+        FROM "Annotation";
+    `;
+
+    /* The parsing is necessary as it will convert the bigints to regular numbers */
+    return ValueCountsSchema.parse((await prismaClient.$queryRaw<ValueCounts[]>(q))[0]);
 }
 
 export async function getAnnotatedCountOverTime(annotatorId : number, days : number){
@@ -131,9 +151,9 @@ export async function getAnnotatedCountOverTime(annotatorId : number, days : num
         GROUP BY day
         ORDER BY day;
     `;
-    // console.log(q.inspect());
-    /* For some buggy reason, queryRaw returns one result when it should return 2. but unsafe works as expected. */
     const results = await prismaClient.$queryRaw<{day : string, count : BigInt}[]>(q);
-    // console.log(results);
-    return results;
+    return z.object({ 
+        day : z.coerce.string(),
+        count : z.coerce.number()
+    }).array().parse(results);
 }
