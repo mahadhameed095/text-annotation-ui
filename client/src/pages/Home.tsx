@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Annotation, AnnotationContract } from "../../api.ts";
 import { userContext, userContextType } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
+import Spinner from '@/components/Spinner.tsx';
 
 const frameworks = [
     {
@@ -44,7 +45,7 @@ type getCatdDataProps = {
 }
 
 const Home = () => {
-    const [_, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useContext(userContext) as userContextType;

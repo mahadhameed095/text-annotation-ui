@@ -57,7 +57,7 @@ const Authentication = () => {
             if (status == 201) {
                 login(body);
                 navigate("/");
-                setloading(false);
+
             }
             else {
                 toast({
@@ -82,7 +82,6 @@ const Authentication = () => {
             if (status == 200) {
                 login(body);
                 navigate("/");
-                setloading(false);
             }
             else {
                 toast({
