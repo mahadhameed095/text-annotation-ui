@@ -45,7 +45,7 @@ type getCatdDataProps = {
 }
 
 const Home = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [_, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useContext(userContext) as userContextType;
