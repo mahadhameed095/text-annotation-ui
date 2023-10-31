@@ -1,7 +1,6 @@
 import { initServer } from "@ts-rest/express";
 import { AnnotationContract } from "../contracts";
 import { AnnotationService } from "../service";
-import { ValueCountsSchema, ValueCountsWithIdSchema } from "../schemas";
 import { AdminOnly } from "../middleware";
 
 const server = initServer();
@@ -25,19 +24,23 @@ const DocumentController = server.router(AnnotationContract, {
     getCountsAll : async ({ req : { user }}) => {
         const counts = await AnnotationService.getCounts(user.id);
         /* Postgres returns BigInts which ts-rest doesnt agree with */
-        return { status : 200, body : ValueCountsSchema.parse(counts) };
+        return { status : 200, body : counts };
     },
     getAnnotatedCountOverTime : async ({ query : { take }, req : { user } }) => {
         const results = await AnnotationService.getAnnotatedCountOverTime(user.id, take);
         /* Postgres returns BigInts which ts-rest doesnt agree with */
-        return { status : 200, body : results.map(row => ({ day : row.day, count : Number(row.count)})) };
+        return { status : 200, body : results };
     },
     getCountsAllAnnotators :{
         middleware : [AdminOnly],
         handler : async() => { 
             const results = await AnnotationService.getCountsAllAnnotators();
-            return { status : 200, body : ValueCountsWithIdSchema.array().parse(results)};
+            return { status : 200, body : results};
         }
+    },
+    getTotalCount : async () => {
+        const results = await AnnotationService.getTotalCounts();
+        return { status : 200, body: results };
     }
 });
 

@@ -89,6 +89,14 @@ const AnnotationContract = c.router({
       },
       summary : 'Get number of all annotated documents(and the breakdown of each label), for all annotators'
     },
+    getTotalCount : {
+      method : 'GET',
+      path : '/getTotalCount',
+      responses : {
+        200 : ValueCountsSchema
+      },
+      summary : 'Get total number of hateful, and islamic documents annotated over all dataset'
+    }
   },
   {
     strictStatusCodes : true,
