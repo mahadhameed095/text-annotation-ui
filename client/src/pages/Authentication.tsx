@@ -1,14 +1,13 @@
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useState }  from 'react';
+import { useContext, useEffect, useState }  from 'react';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { User } from "../../api";
 import { userContext, userContextType } from '@/context';
 import { useToast } from '@/components/ui/use-toast';
-import clsx from 'clsx';
 import Spinner from '@/components/Spinner';
 
 const Schema = z.object({
@@ -19,9 +18,9 @@ const Schema = z.object({
 });
 
 const Authentication = () => {
-    const [isRegister, setIsRegister] = useState<boolean>(false);
-    const {login} = useContext(userContext) as userContextType;
-    const [loading, setloading] = useState<boolean>(false);
+    const [isRegister, setIsRegister] = useState<Boolean>(false);
+    const {user, login} = useContext(userContext) as userContextType;
+    const [isLoading, setIsLoading] = useState<Boolean>(false);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -39,9 +38,13 @@ const Authentication = () => {
           },
       });
 
+    useEffect(() => {
+        user ? navigate("/") : ""
+    }, [])
+
     const SignUp = () => 
     {
-          setloading(true);  
+          setIsLoading(true);
           formik.handleSubmit();
           User.register({
             body: {
@@ -54,7 +57,7 @@ const Authentication = () => {
             if (status == 201) {
                 login(body);
                 navigate("/");
-                setloading(false);
+
             }
             else {
                 toast({
@@ -68,7 +71,7 @@ const Authentication = () => {
   
     const SignIn = () =>
     {
-        setloading(true);
+        setIsLoading(true);
         formik.handleSubmit();
         User.login({
             body: {
@@ -79,7 +82,6 @@ const Authentication = () => {
             if (status == 200) {
                 login(body);
                 navigate("/");
-                setloading(false);
             }
             else {
                 toast({
@@ -93,13 +95,9 @@ const Authentication = () => {
   
 
     return ( 
-        <div className={clsx(
-            "bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]"
-            )}>
-            {loading && <Spinner className='w-10 absolute inset-0 m-auto'/>}
-            <Card className={clsx(
-                'bg-white shadow-md rounded w-120 m-auto',
-                loading && "pointer-events-none opacity-50")}>
+        <div className="bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">
+            {isLoading == false ? 
+            <Card className='bg-white shadow-md rounded w-120 m-auto'>
                 <CardHeader className="space-y-1">
                     { isRegister ? 
                     <>
@@ -183,6 +181,7 @@ const Authentication = () => {
                         </div>
                 </CardFooter>
             </Card>
+            : Spinner({className:"w-16 m-auto"})}
         </div>
      );
 }

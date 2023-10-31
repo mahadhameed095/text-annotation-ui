@@ -45,7 +45,7 @@ type getCatdDataProps = {
 }
 
 const Home = () => {
-    const [_, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useContext(userContext) as userContextType;
@@ -195,51 +195,52 @@ const Home = () => {
 
     return ( 
         <>
-          {!data ? <Spinner className='w-10 absolute inset-0 m-auto'/>
-          :
-          <div className='mx-auto p-6 md:p-10'>
-              <div className='mb-4 flex'>
-                  <div>
-                      <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-                  </div>
-                  <div className='ml-auto'>
-                      <Button className="" onClick={() => navigate("/tool")}>
-                          Annotation Tool
-                          <svg className='m-1' width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                      </Button>
-                  </div>
-              </div>
-              <div className={`grid gap-4 md:grid-cols-3 ${getCols()}`}>
-                {renderCards()}
-              </div>
-              <div className="py-4 sm:grid sm:gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
-                  <Card className="col-span-4">
-                    <CardHeader className='flex-row'>
-                      <CardTitle>Overview</CardTitle>
-                      <div className='ml-auto'>
-                          {renderDropdown()}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                      <Overview data={data?.["performance"]}/>
-                    </CardContent>
-                  </Card>
-                  <Card className="col-span-3 sm:mt-0 mt-2">
-                    <CardHeader>
-                      <CardTitle>Overall Progress (All Annotators)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                      <div className='p-4'>
-                          <div className='pb-4'>
-                              <CardDescription>Annotation Tasks Completed</CardDescription>
-                              <Progress value={51} />
-                          </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-              </div>
-          </div> 
-          }
+          {isAuthenticated ?
+          <>
+            {data ? 
+            <div className='mx-auto p-6 md:p-10'>
+                <div className='mb-4 flex'>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+                    </div>
+                    <div className='ml-auto'>
+                        <Button className="" onClick={() => navigate("/tool")}>
+                            Annotation Tool
+                            <svg className='m-1' width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.8536 1.14645C11.6583 0.951184 11.3417 0.951184 11.1465 1.14645L3.71455 8.57836C3.62459 8.66832 3.55263 8.77461 3.50251 8.89155L2.04044 12.303C1.9599 12.491 2.00189 12.709 2.14646 12.8536C2.29103 12.9981 2.50905 13.0401 2.69697 12.9596L6.10847 11.4975C6.2254 11.4474 6.3317 11.3754 6.42166 11.2855L13.8536 3.85355C14.0488 3.65829 14.0488 3.34171 13.8536 3.14645L11.8536 1.14645ZM4.42166 9.28547L11.5 2.20711L12.7929 3.5L5.71455 10.5784L4.21924 11.2192L3.78081 10.7808L4.42166 9.28547Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                        </Button>
+                    </div>
+                </div>
+                <div className={`grid gap-4 md:grid-cols-3 ${getCols()}`}>
+                  {renderCards()}
+                </div>
+                <div className="py-4 sm:grid sm:gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
+                    <Card className="col-span-4">
+                      <CardHeader className='flex-row'>
+                        <CardTitle>Overview</CardTitle>
+                        <div className='ml-auto'>
+                            {renderDropdown()}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pl-2">
+                        <Overview data={data?.["performance"]}/>
+                      </CardContent>
+                    </Card>
+                    <Card className="col-span-3 sm:mt-0 mt-2">
+                      <CardHeader>
+                        <CardTitle>Overall Progress (All Annotators)</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pl-2">
+                        <div className='p-4'>
+                            <div className='pb-4'>
+                                <CardDescription className='mb-1'>Annotation Tasks Completed</CardDescription>
+                                <Progress value={51} />
+                            </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                </div>
+            </div> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
+          </> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
         </>
      );
 }
