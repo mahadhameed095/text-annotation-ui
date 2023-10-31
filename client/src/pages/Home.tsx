@@ -232,7 +232,7 @@ const Home = () => {
                       <CardContent className="pl-2">
                         <div className='p-4'>
                             <div className='pb-4'>
-                                <CardDescription>Annotation Tasks Completed</CardDescription>
+                                <CardDescription className='mb-1'>Annotation Tasks Completed</CardDescription>
                                 <Progress value={51} />
                             </div>
                         </div>
