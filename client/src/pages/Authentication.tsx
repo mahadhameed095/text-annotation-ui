@@ -21,7 +21,7 @@ const Schema = z.object({
 const Authentication = () => {
     const [isRegister, setIsRegister] = useState<boolean>(false);
     const {login} = useContext(userContext) as userContextType;
-    const [loading, setIsLoading] = useState<boolean>(false);
+    const [loading, setloading] = useState<boolean>(false);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -41,7 +41,7 @@ const Authentication = () => {
 
     const SignUp = () => 
     {
-          setIsLoading(true);  
+          setloading(true);  
           formik.handleSubmit();
           User.register({
             body: {
@@ -54,7 +54,7 @@ const Authentication = () => {
             if (status == 201) {
                 login(body);
                 navigate("/");
-                setIsLoading(false);
+                setloading(false);
             }
             else {
                 toast({
@@ -68,7 +68,7 @@ const Authentication = () => {
   
     const SignIn = () =>
     {
-        setIsLoading(true);
+        setloading(true);
         formik.handleSubmit();
         User.login({
             body: {
@@ -79,7 +79,7 @@ const Authentication = () => {
             if (status == 200) {
                 login(body);
                 navigate("/");
-                setIsLoading(false);
+                setloading(false);
             }
             else {
                 toast({
@@ -96,7 +96,7 @@ const Authentication = () => {
         <div className={clsx(
             "bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]"
             )}>
-            {loading && <Spinner className='w-10 absolute ml-[48vw] mt-[44vh]'/>}
+            {loading && <Spinner className='w-10 absolute inset-0 m-auto'/>}
             <Card className={clsx(
                 'bg-white shadow-md rounded w-120 m-auto',
                 loading && "pointer-events-none opacity-50")}>

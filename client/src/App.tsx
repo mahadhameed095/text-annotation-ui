@@ -21,15 +21,17 @@ export default function App() {
   return (
     <userContext.Provider value={{user, login, logout}}>
       <Router basename='/text-annotation-ui/'>
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home/>} /> 
-            <Route path="/login" element={<Authentication/>} /> 
-            <Route path="/tool" element={<AnnotationTool/>} /> 
-            <Route path="/admin" element={<Admin/>} />
-            <Route path="*" element={<Home/>} />  
-          </Routes>
           <Toaster/>
+          <Header />
+          <div className="container min-h-[calc(100vh - 64px)]">
+            <Routes>
+              <Route path="/" element={<Home/>} /> 
+              <Route path="/login" element={<Authentication/>} /> 
+              <Route path="/tool" element={<AnnotationTool/>} /> 
+              <Route path="/admin" element={<Admin/>} />
+              <Route path="*" element={<Home/>} />  
+            </Routes>
+          </div>
       </Router>
     </userContext.Provider>
   )
