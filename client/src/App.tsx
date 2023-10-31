@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "./components/Header";
 import { userContext, userType } from "./context";
 import { useState } from "react";
-
 export default function App() {
   const [user, setUser] = useState<userType | null>(null);
 
@@ -21,16 +20,18 @@ export default function App() {
 
   return (
     <userContext.Provider value={{user, login, logout}}>
-      <Router>
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home/>} /> 
-            <Route path="/login" element={<Authentication/>} /> 
-            <Route path="/tool" element={<AnnotationTool/>} /> 
-            <Route path="/admin" element={<Admin/>} />
-            <Route path="*" element={<Home/>} />  
-          </Routes>
+      <Router basename='/text-annotation-ui/'>
           <Toaster/>
+          <Header />
+          <div className="container min-h-[calc(100vh - 64px)]">
+            <Routes>
+              <Route path="/" element={<Home/>} /> 
+              <Route path="/login" element={<Authentication/>} /> 
+              <Route path="/tool" element={<AnnotationTool/>} /> 
+              <Route path="/admin" element={<Admin/>} />
+              <Route path="*" element={<Home/>} />  
+            </Routes>
+          </div>
       </Router>
     </userContext.Provider>
   )

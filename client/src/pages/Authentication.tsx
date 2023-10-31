@@ -53,15 +53,11 @@ const Authentication = () => {
                 email: formik.values.email,  
             }
           }).then(({status, body}) => {
+            
             if (status == 201) {
-                login({
-                    id: body.id,
-                    name: body.name,
-                    email: body.email,
-                    role: body.role,
-                    token: body.token,
-                })
+                login(body);
                 navigate("/");
+                setloading(false);
             }
             else {
                 toast({
@@ -83,16 +79,10 @@ const Authentication = () => {
                 password: formik.values.password
             }
         }).then(({status, body}) => {
-            console.log("body",body)
             if (status == 200) {
-                login({
-                    id: body.id,
-                    name: body.name,
-                    email: body.email,
-                    role: body.role,
-                    token: body.token,
-                })
+                login(body);
                 navigate("/");
+                setloading(false);
             }
             else {
                 toast({
