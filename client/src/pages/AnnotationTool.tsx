@@ -5,7 +5,8 @@ import { Annotation, AnnotationContract, Labels } from "../../api.ts";
 import { useNavigate } from "react-router-dom";
 import { userContextType, userContext } from "@/context.ts";
 import { ClientInferResponseBody } from "@ts-rest/core";
-import { Nullable } from "@/lib/utils.ts";
+import { Nullable, checkForServerError } from "@/lib/utils.ts";
+import { useToast } from '@/components/ui/use-toast';
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -20,6 +21,7 @@ const AnnotationTool = () => {
     const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
+    const {toast} = useToast();
     const labelsToSubmit = useRef<Nullable<Labels>>({
         islamic : null,
         hateful : null
@@ -41,26 +43,29 @@ const AnnotationTool = () => {
                     take: 10
                 }
             }).then(({status, body}) => {
-                if (body.length < 5) {
-                    return Annotation.reserveAnnotation({
-                        headers: {
-                            authorization: `Bearer ${user.token}`
-                        },                        
-                    }).then(({status, body}) => {
-                        if (status == 200) {
-                            console.log("reserving tasks...")
-                            console.log("tool", status, body);
-                            return body
-                        }
-                    })
-                }
-                else { 
-                    console.log("tool", status, body);
-                    return body;
+                checkForServerError(status, toast);
+                if (status == 200) {
+                    if (body.length < 5) {
+                        return Annotation.reserveAnnotation({
+                            headers: {
+                                authorization: `Bearer ${user.token}`
+                            },                        
+                        }).then(({status, body}) => {
+                            checkForServerError(status, toast);
+                            if (status == 200) {
+                                console.log("reserving tasks...")
+                                return body
+                            }
+                        })
+                    }
+                    else { 
+                        return body;
+                    }
                 }
             })
         }
     }
+
     
     function getHistory() {
         console.log("getting history...")
@@ -73,8 +78,11 @@ const AnnotationTool = () => {
                     take: 10
                 }
             }).then(({status, body}) => {
-                console.log("past annotations", status, body);
-                return body;
+                checkForServerError(status, toast);
+                if (status == 200) {
+                    console.log("past annotations", status, body);
+                    return body;
+                }
             })
         }
     }
@@ -85,7 +93,6 @@ const AnnotationTool = () => {
             getTasks(),
             getHistory()
         ]).then(([tasks, history]) => {
-            console.log("tasks", tasks)
             if (tasks) {
                 if (history) {
                     data.current = history.reverse()
@@ -160,16 +167,12 @@ const AnnotationTool = () => {
         }
     }
 
-    useHotkeys('enter', onSubmit);
 
-    console.log("1", (data.current && activeEntryIndex != null && data.current[activeEntryIndex]));
-    console.log("2", (data.current && activeEntryIndex != null));
-    console.log("3", (activeEntryIndex != null && data.current[activeEntryIndex]));
-    console.log(data.current, activeEntryIndex);
+    useHotkeys('enter', onSubmit);
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4"> 
-        {data.current && activeEntryIndex != null && data.current[activeEntryIndex] &&
+        {(data.current && activeEntryIndex != null && data.current[activeEntryIndex]) &&
             <EntryUI 
                 entry={data.current[activeEntryIndex]} 
                 onChange={onChange}

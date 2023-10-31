@@ -65,7 +65,8 @@ const Authentication = () => {
                     title: "Signup Failed",
                     description: body.message,
                   })
-                }
+            }
+            setIsLoading(false);
           })
     };
   
@@ -90,12 +91,13 @@ const Authentication = () => {
                     description: body.message,
                 })
             }
+            setIsLoading(false);
          })
     };
   
 
     return ( 
-        <div className="bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">
+        <div className="flex h-[calc(100vh-64px)]">
             {isLoading == false ? 
             <Card className='bg-white shadow-md rounded w-120 m-auto'>
                 <CardHeader className="space-y-1">
