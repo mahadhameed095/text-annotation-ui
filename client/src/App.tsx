@@ -23,7 +23,7 @@ export default function App() {
       <Router basename='/text-annotation-ui/'>
           <Toaster/>
           <Header />
-          <div className="container min-h-[calc(100vh - 64px)]">
+          <div className="min-h-[calc(100vh - 64px)]">
             <Routes>
               <Route path="/" element={<Home/>} /> 
               <Route path="/login" element={<Authentication/>} /> 

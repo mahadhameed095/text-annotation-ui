@@ -1,58 +1,24 @@
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
- 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Papa from 'papaparse';
-import { useRef } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
+import { Annotation, User } from "../../api.ts";
+import { userContext, userContextType } from "@/context";
+import { checkForServerError } from "@/lib/utils.ts";
+import { useToast } from "@/components/ui/use-toast.ts";
+
 
 type User = {
+  id: number,
   name : string;
   email :string;
-  annotatedCount : number;
-  assignedCount : number;
+  total : number;
+  islamic : number;
+  non_islamic : number;
+  hateful : number;
 }
-
-const users : User[] = [
-  {
-    name : "Mahad Hameed",
-    email : "mahad@AnnoText.com",
-    annotatedCount : 1960,
-    assignedCount : 125
-  },
-  {
-    name : "Raahim Siddiqi",
-    email : "raahim@AnnoText.com",
-    annotatedCount : 2000,
-    assignedCount : 125
-  },
-  {
-    name : "Ahmed Mahmood",
-    email : "ahmed@AnnoText.com",
-    assignedCount : 300,
-    annotatedCount : 1500
-  }
-];
 
 
 const uploadDocuments = (inputFile: any) => {
@@ -60,10 +26,7 @@ const uploadDocuments = (inputFile: any) => {
       Papa.parse(inputFile.current.files[0], {
           complete: (results) => {
             if (results.data.length > 0) {
-              // Iterate through each row in the CSV file
-              // results.data.forEach((row: any, index: any) => {
-              //     // setDoc(doc(db, "documents", `${index + 1}`), {document:row["document"]});
-              // });
+
             } 
             else {
               console.log('CSV file is empty');
@@ -87,15 +50,33 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div className="text-center">{row.getValue('email')}</div> 
   },
   {
-    accessorKey : "annotatedCount",
+    accessorKey : "total",
     header: () => <div className="text-center">Annotated</div>,
-    cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('annotatedCount')}</div> 
+    cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('total')}</div> 
+  },
+  {
+    accessorKey : "islamic",
+    header: () => <div className="text-center">Islamic</div>,
+    cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('islamic')}</div> 
+  },
+  {
+    accessorKey : "non_islamic",
+    header: () => <div className="text-center">Non-Islamic</div>,
+    cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('non_islamic')}</div> 
+  },
+  {
+    accessorKey : "hateful",
+    header: () => <div className="text-center">Hateful</div>,
+    cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('hateful')}</div> 
   },
 ];
 
 
 export default function Admin() {
   const inputFile = useRef(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const {user} = useContext(userContext) as userContextType;
+  const {toast} = useToast();
   
   const table = useReactTable({
     data : users,
@@ -103,9 +84,63 @@ export default function Admin() {
     getCoreRowModel: getCoreRowModel(),
   })
 
+  console.log("meow", user)
+
+  const fetchCounts = () => {
+    if (user) {
+      return Annotation.getCountsAllAnnotators({
+        headers: {
+          authorization: `Bearer ${user.token}`
+        }
+      }).then(({status, body}) => {
+        if (status == 200) {
+          return body
+        }
+      })
+    }
+  }
+
+  const fetchAnnotaters = () => {
+    return User.listAll().then(({status, body}) => {
+      checkForServerError(status, toast)
+      console.log("nani", user, body)
+      if (status == 200) {
+        return body
+      }
+      else if (status == 400) {
+        toast({
+          variant: "destructive",
+          title: "Authorization Error",
+        })
+      }
+    })
+  }
+
+  useEffect(() => {
+    Promise.all([
+      fetchAnnotaters(),
+      fetchCounts()
+    ]).then(([users, counts]) => {
+      if (users && counts) {
+        const combinedList : User[] = [];
+
+        users.forEach(obj1 => {
+          const matchedObj2 = counts.find(obj2 => obj2.id === obj1.id);
+          if (matchedObj2) {
+            const combinedObject = { ...obj1, ...matchedObj2 };
+            const { id, name, email, total, islamic, non_islamic, hateful } = combinedObject;
+            combinedList.push({ id, name, email, total, islamic, non_islamic, hateful });
+          }
+        }); 
+
+        setUsers(combinedList);
+      }
+    })
+  }, [])
+
   return (
     <>
-    <Card className="max-w-[600px] mx-4 md:mx-auto border mt-16 shadow-md rounded-md">
+    <Card className="max-w-[800px] m-6 md:mx-auto border mt-16 shadow-md rounded-md">
       <CardHeader>
         <CardTitle>Annotators</CardTitle>
         <CardDescription className="flex justify-between items-center">
@@ -160,7 +195,7 @@ export default function Admin() {
       </CardContent>
     </Card>
 
-    <Card className="max-w-[600px] mx-4 md:mx-auto border mt-16 shadow-md rounded-md">
+    <Card className="max-w-[800px] m-6 md:mx-auto border mt-16 shadow-md rounded-md">
     <CardHeader>
         <CardTitle>Documents</CardTitle>
         <CardDescription className="flex justify-between items-center">
