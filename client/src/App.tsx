@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "./components/Header";
 import { userContext, userType } from "./context";
 import { useState } from "react";
-
 export default function App() {
   const [user, setUser] = useState<userType | null>(null);
 
@@ -21,7 +20,7 @@ export default function App() {
 
   return (
     <userContext.Provider value={{user, login, logout}}>
-      <Router>
+      <Router basename='/text-annotation-ui/'>
           <Header />
           <Routes>
             <Route path="/" element={<Home/>} /> 
