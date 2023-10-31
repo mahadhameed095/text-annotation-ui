@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema } from "../schemas";
+import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema, ValueCountsWithIdSchema } from "../schemas";
 import { z } from "zod";
 
 const c = initContract();
@@ -78,14 +78,25 @@ const AnnotationContract = c.router({
         }).array()
       },
       summary : 'Get number of annotated documents grouped by last <take> days'
-    }
+    },
+    getCountsAllAnnotators : {
+      method : 'GET',
+      path : '/getCountsAllAnnotators',
+      responses : {
+        200 : ValueCountsWithIdSchema.extend({
+          id : z.number()
+        }).array()
+      },
+      summary : 'Get number of all annotated documents(and the breakdown of each label), for all annotators'
+    },
   },
   {
     strictStatusCodes : true,
     baseHeaders : z.object({
         authorization : z.string()
     })
-  }
+  },
+  
 );
 
 export default AnnotationContract

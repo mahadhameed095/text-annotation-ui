@@ -85,6 +85,8 @@ export const ValueCountsSchema = z.object({
     islamic : z.coerce.number().int(),
     non_islamic : z.coerce.number().int(),
 });
+export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.number() });
 
 export type Value = z.infer<typeof ValueSchema>;
 export type ValueCounts = z.infer<typeof ValueCountsSchema>;
+export type ValueCountsWithId = z.infer<typeof ValueCountsWithIdSchema>;

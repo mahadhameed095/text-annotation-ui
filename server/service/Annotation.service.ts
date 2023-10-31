@@ -1,6 +1,6 @@
 import Env from '../ENV';
 import prismaClient from '../prisma';
-import { AssignedAnnotation, User, ValueCounts } from '../schemas';
+import { AssignedAnnotation, User, ValueCounts, ValueCountsWithId } from '../schemas';
 import { Annotation, Prisma } from '@prisma/client';
 
 export async function submitAnnotation(
@@ -94,7 +94,7 @@ export async function getPastAnnotated(annotatorId : number, take ?: number){
 export async function getCounts(annotatorId : number){
     const q = Prisma.sql`
         SELECT
-            SUM(CASE WHEN "value" != 'null' THEN 1 ELSE 0 END) AS total,
+            SUM(CASE WHEN "value" != 'null' AND "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
             SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
             SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
             SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
@@ -103,6 +103,21 @@ export async function getCounts(annotatorId : number){
         WHERE "annotatorId" = ${annotatorId};
     `;
     return (await prismaClient.$queryRaw<ValueCounts[]>(q))[0];
+}
+
+export async function getCountsAllAnnotators(){
+    const q = Prisma.sql`
+    SELECT
+    	U."id",
+        SUM(CASE WHEN "value" != 'null' AND "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
+        SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
+        SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
+        SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
+        SUM(CASE WHEN "value"->>'islamic' = 'false' THEN 1 ELSE 0 END) AS non_islamic
+    FROM "User" U LEFT JOIN "Annotation" A on U."id" = A."annotatorId"
+    GROUP BY U."id";
+    `;
+    return (await prismaClient.$queryRaw<ValueCountsWithId[]>(q));
 }
 
 export async function getAnnotatedCountOverTime(annotatorId : number, days : number){
