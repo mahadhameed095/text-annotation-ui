@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Annotation, AnnotationContract } from "../../api.ts";
 import { userContext, userContextType } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
+import Spinner from '@/components/Spinner.tsx';
 
 const frameworks = [
     {
@@ -238,8 +239,8 @@ const Home = () => {
                       </CardContent>
                     </Card>
                 </div>
-            </div> : <p>weeee</p>}
-          </> : ""}
+            </div> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
+          </> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
         </>
      );
 }

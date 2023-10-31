@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { useContext, useState }  from 'react';
+import { useContext, useEffect, useState }  from 'react';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { User } from "../../api";
 import { userContext, userContextType } from '@/context';
 import { useToast } from '@/components/ui/use-toast';
+import Spinner from '@/components/Spinner';
 
 const Schema = z.object({
     email: z.string().email(),
@@ -18,7 +19,8 @@ const Schema = z.object({
 
 const Authentication = () => {
     const [isRegister, setIsRegister] = useState<Boolean>(false);
-    const {login} = useContext(userContext) as userContextType;
+    const {user, login} = useContext(userContext) as userContextType;
+    const [isLoading, setIsLoading] = useState<Boolean>(false);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -36,8 +38,13 @@ const Authentication = () => {
           },
       });
 
+    useEffect(() => {
+        user ? navigate("/") : ""
+    }, [])
+
     const SignUp = () => 
     {
+          setIsLoading(true);
           formik.handleSubmit();
           User.register({
             body: {
@@ -68,6 +75,7 @@ const Authentication = () => {
   
     const SignIn = () =>
     {
+        setIsLoading(true);
         formik.handleSubmit();
         User.login({
             body: {
@@ -99,6 +107,7 @@ const Authentication = () => {
 
     return ( 
         <div className="bg-gray-100 flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">
+            {isLoading == false ? 
             <Card className='bg-white shadow-md rounded w-120 m-auto'>
                 <CardHeader className="space-y-1">
                     { isRegister ? 
@@ -183,6 +192,7 @@ const Authentication = () => {
                         </div>
                 </CardFooter>
             </Card>
+            : Spinner({className:"w-16 m-auto"})}
         </div>
      );
 }
