@@ -172,7 +172,7 @@ const AnnotationTool = () => {
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4"> 
-        {(data.current && activeEntryIndex != null && data.current[activeEntryIndex]) &&
+        {(data.current && activeEntryIndex !== null && data.current[activeEntryIndex]) &&
             <EntryUI 
                 entry={data.current[activeEntryIndex]} 
                 onChange={onChange}

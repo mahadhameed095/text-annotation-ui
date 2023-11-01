@@ -32,7 +32,12 @@ type AnnotaterStatistics = {
     title: string,
     value: number
   }[]
-  performance : AnnotationContractType | undefined
+  performance : AnnotationContractType | undefined,
+  progress : {
+    total: number,
+    annotated: number,
+    user_annotated: number
+  }
 }
 
 interface bodyType {
@@ -52,7 +57,7 @@ const Home = () => {
     const [data, setData] = useState<AnnotaterStatistics | null>(null);
     const navigate = useNavigate();
     
-    function getCardData() {
+    function fetchCardData() {
       if (user) {
         console.log("fetching getCardData....")
         return Annotation.getCountsAll({
@@ -73,7 +78,7 @@ const Home = () => {
     }
 
 
-    function getAnnotatedCountOverTime() {
+    function fetchAnnotatedCountOverTime() {
       if (user && value && value.match(/\d+/)) {
         console.log("fetching getAnnotatedCountOverTime....", parseInt(value.match(/\d+/)![0], 10))
         return Annotation.getAnnotatedCountOverTime({
@@ -93,17 +98,36 @@ const Home = () => {
     }
 
 
+    function fetchAnnotationProgress() {
+      if (user) {
+        return Annotation.getTotalCount({
+          headers: {
+            authorization: `Bearer ${user.token}`
+          },
+        }).then(({status, body}) => {
+          if (status == 200) {
+            return body;
+          }
+        })
+      }
+    }
+
     useEffect(() => {
       user ? setIsAuthenticated(true) : navigate("/login");
     }, [])
 
     useEffect(() => {
       Promise.all([
-        getCardData(),
-        getAnnotatedCountOverTime()
-      ]).then(([cardData, performanceData]) => {
-        if (cardData) {
-          setData({labels : cardData["labels"], performance: performanceData})
+        fetchCardData(),
+        fetchAnnotatedCountOverTime(),
+        fetchAnnotationProgress()
+      ]).then(([cardData, performanceData, annotationProgress]) => {
+        if (cardData && annotationProgress) {
+          const total = annotationProgress["total"];
+          const annotated = annotationProgress["islamic"] + annotationProgress["non_islamic"]
+          const user_annotated = cardData["labels"].find(obj => obj.title === "total")!.value
+        
+          setData({labels : cardData["labels"], performance: performanceData, progress: {total, annotated, user_annotated}})
         }
       })
     }, [value])
@@ -234,13 +258,14 @@ const Home = () => {
                     </Card>
                     <Card className="col-span-3 sm:mt-0 mt-2">
                       <CardHeader>
-                        <CardTitle>Overall Progress (All Annotators)</CardTitle>
+                        <CardTitle>Annotation Progress</CardTitle>
                       </CardHeader>
                       <CardContent className="pl-2">
                         <div className='p-4'>
-                            <div className='pb-4'>
-                                <CardDescription className='mb-1'>Annotation Tasks Completed</CardDescription>
-                                <Progress value={51} />
+                            <div className='p-2'>
+                                <CardDescription className='mb-1'>Annotation Tasks Completed ({data.progress["annotated"]/data.progress["total"]*100})%</CardDescription>
+                                <Progress className="h-3" value={data.progress["annotated"]/data?.progress["total"]*100} />
+                                <CardDescription className='my-4'>Your Contribution: {Math.round(data.progress["user_annotated"]/data.progress["total"]*100, 2)}%</CardDescription>
                             </div>
                         </div>
                       </CardContent>

@@ -83,6 +83,7 @@ const Authentication = () => {
             if (status == 200) {
                 login(body);
                 navigate("/");
+                console.log(body);
             }
             else {
                 toast({

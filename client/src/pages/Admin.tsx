@@ -101,19 +101,25 @@ export default function Admin() {
   }
 
   const fetchAnnotaters = () => {
-    return User.listAll().then(({status, body}) => {
-      checkForServerError(status, toast)
-      console.log("nani", user, body)
-      if (status == 200) {
-        return body
-      }
-      else if (status == 400) {
-        toast({
-          variant: "destructive",
-          title: "Authorization Error",
-        })
-      }
-    })
+    if (user) {
+      return User.listAll({
+        headers: {
+          authorization: `Bearer ${user.token}`
+        } 
+      } as any).then(({status, body}) => {
+        checkForServerError(status, toast)
+        console.log("nani", user, body)
+        if (status == 200) {
+          return body
+        }
+        else if (status == 400) {
+          toast({
+            variant: "destructive",
+            title: "Authorization Error",
+          })
+        }
+      })
+    }
   }
 
   useEffect(() => {
