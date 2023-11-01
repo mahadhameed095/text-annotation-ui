@@ -5,7 +5,8 @@ export * from '../server/schemas';
 
 export type Labels = Value;
 
-const baseUrl = 'https://annotext.azurewebsites.net/';
+// const baseUrl = 'https://annotext.azurewebsites.net/';
+const baseUrl = 'http://localhost:5433';
 
 export const User = initClient(Contracts.UserContract, {
     baseUrl,
