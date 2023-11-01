@@ -1,5 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { DocumentSchema } from "../schemas";
+import { z } from "zod";
 
 const c = initContract();
 
@@ -16,7 +17,10 @@ const DocumentContract = c.router({
         summary : 'Add a document (admin-only access)'
     },
 },{
-    strictStatusCodes : true
+    strictStatusCodes : true,
+    baseHeaders : z.object({
+        authorization : z.string()
+    })
 });
 
 export default DocumentContract;

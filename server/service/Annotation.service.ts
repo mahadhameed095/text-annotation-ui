@@ -61,7 +61,7 @@ export async function reserveAnnotations(annotatorId : User['id']){
 export async function getAssignedAnnotations(annotatorId : number, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
-            value : { equals : Prisma.AnyNull},
+            value : { equals : Prisma.AnyNull },
             annotatorId
         },
         select : {
@@ -77,7 +77,7 @@ export async function getAssignedAnnotations(annotatorId : number, take ?: numbe
 export async function getPastAnnotated(annotatorId : number, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
-            value : { not : Prisma.JsonNull},
+            value : { not : Prisma.AnyNull },
             annotatorId
         },
         select : {
@@ -128,7 +128,7 @@ export async function getCountsAllAnnotators(){
 export async function getTotalCounts(){
     const q = Prisma.sql`
         SELECT
-            SUM(CASE WHEN "value" != 'null' AND "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
+            (SELECT COUNT(*) FROM "Document") AS total,
             SUM(CASE WHEN "value"->>'hateful' = 'true'  THEN 1 ELSE 0 END) AS hateful,
             SUM(CASE WHEN "value"->>'hateful' = 'false' THEN 1 ELSE 0 END) AS non_hateful,
             SUM(CASE WHEN "value"->>'islamic' = 'true'  THEN 1 ELSE 0 END) AS islamic,
