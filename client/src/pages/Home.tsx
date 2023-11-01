@@ -263,9 +263,9 @@ const Home = () => {
                       <CardContent className="pl-2">
                         <div className='p-4'>
                             <div className='p-2'>
-                                <CardDescription className='mb-1'>Annotation Tasks Completed ({data.progress["annotated"]/data.progress["total"]*100})%</CardDescription>
-                                <Progress className="h-3" value={data.progress["annotated"]/data?.progress["total"]*100} />
-                                <CardDescription className='my-4'>Your Contribution: {Math.round(data.progress["user_annotated"]/data.progress["total"]*100, 2)}%</CardDescription>
+                                <CardDescription className='mb-1'>Annotation Tasks Completed  ({(data.progress["annotated"]/data.progress["total"]*100).toFixed(2)}%)</CardDescription>
+                                <Progress className="h-3" value={parseFloat((data.progress["annotated"]/data?.progress["total"]*100).toFixed(2))} />
+                                <CardDescription className='my-4'>Your Contribution: {(data.progress["user_annotated"]/data.progress["total"]*100).toFixed(2)}%</CardDescription>
                             </div>
                         </div>
                       </CardContent>
