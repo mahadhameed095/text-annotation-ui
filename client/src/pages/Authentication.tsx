@@ -13,8 +13,8 @@ import Spinner from '@/components/Spinner';
 const Schema = z.object({
     email: z.string().email(),
     name: z.string(),
-    password: z.string().min(4),
-    confirmPassword: z.string().min(4),
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
 });
 
 const Authentication = () => {
@@ -44,20 +44,18 @@ const Authentication = () => {
 
     const SignUp = () => 
     {
-          setIsLoading(true);
-          formik.handleSubmit();
-          User.register({
+        setIsLoading(true);
+        formik.handleSubmit();
+        User.register({
             body: {
                 name: formik.values.name, 
                 password: formik.values.password, 
                 email: formik.values.email,  
             }
           }).then(({status, body}) => {
-            
             if (status == 201) {
                 login(body);
                 navigate("/");
-
             }
             else {
                 toast({
@@ -66,14 +64,21 @@ const Authentication = () => {
                     description: body.message,
                   })
             }
-            setIsLoading(false);
-          })
+        }).catch((err: any) => {
+            toast({
+                variant: "destructive",
+                title: "Unable to establish connection",
+                description: err.message + ' ~ Contact Administrator at k200338@nu.edu.pk',
+            })
+        })
+        setIsLoading(false);
     };
   
     const SignIn = () =>
     {
         setIsLoading(true);
         formik.handleSubmit();
+
         User.login({
             body: {
                 email: formik.values.email,
@@ -83,7 +88,6 @@ const Authentication = () => {
             if (status == 200) {
                 login(body);
                 navigate("/");
-                console.log(body);
             }
             else {
                 toast({
@@ -92,8 +96,14 @@ const Authentication = () => {
                     description: body.message,
                 })
             }
-            setIsLoading(false);
-         })
+        }).catch((err: any) => {
+            toast({
+                variant: "destructive",
+                title: "Unable to establish connection",
+                description: err.message + ' ~ Contact Administrator at k200338@nu.edu.pk',
+            })
+        })
+        setIsLoading(false);
     };
   
 
@@ -156,6 +166,7 @@ const Authentication = () => {
                                     {...formik.getFieldProps('password')}
                                     id="password"
                                     name="password"
+                                    type = "password"
                             /> 
                     </div>
                     <div className=''>  

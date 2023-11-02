@@ -157,7 +157,7 @@ const AnnotationTool = () => {
             alert("cannot submit because null.");
         else{
             if (data.current && user && activeEntryIndex != null) {
-                Annotation.submitAnnotation({
+                return Annotation.submitAnnotation({
                     headers: {
                         authorization: `Bearer ${user.token}`
                     },
