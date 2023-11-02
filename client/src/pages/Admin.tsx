@@ -146,12 +146,12 @@ export default function Admin() {
 
   return (
     <>
-    <Card className="max-w-[800px] m-6 md:mx-auto border mt-16 shadow-md rounded-md">
+    <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
       <CardHeader>
-        <CardTitle>Annotators</CardTitle>
-        <CardDescription className="flex justify-between items-center">
+        <CardTitle>Annotator Overview</CardTitle>
+        {/* <CardDescription className="flex justify-between items-center">
           Annotators gonna annotate
-        </CardDescription>
+        </CardDescription> */}
       </CardHeader>
       <hr/>
       <CardContent className="grid gap-6 py-6">
@@ -201,12 +201,11 @@ export default function Admin() {
       </CardContent>
     </Card>
 
-    <Card className="max-w-[800px] m-6 md:mx-auto border mt-16 shadow-md rounded-md">
+    <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
     <CardHeader>
-        <CardTitle>Documents</CardTitle>
+        <CardTitle>Document Management Panel</CardTitle>
         <CardDescription className="flex justify-between items-center">
-          Document Management Panel
-          <Button className='ml-1' onClick={()=>{(inputFile.current as any).click()}}>
+          <Button className='m-2 ml-auto' onClick={()=>{(inputFile.current as any).click()}}>
               Upload Documents
               <input type='file' id='file' onChange={() => uploadDocuments(inputFile)}  ref={inputFile} style={{display: 'none'}}/>
           </Button>
