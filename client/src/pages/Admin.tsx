@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import Papa from 'papaparse';
 import { useContext, useEffect, useRef, useState } from "react"
 import { Annotation, Document, User } from "../../api.ts";
 import { userContext, userContextType } from "@/context";
