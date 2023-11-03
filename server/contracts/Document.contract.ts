@@ -8,12 +8,13 @@ const DocumentContract = c.router({
     add: {
         method : 'POST',
         path : '/addDocument',
+        contentType : 'multipart/form-data',
         responses:{
           201 : DocumentSchema.shape.id.array(),
-          400 : c.type<{ message : 'Maximum of 15000 documents can be inserted at a time.'}>()
         },
-        body: DocumentSchema
-                .pick({ text : true, metadata : true}).array(),
+        body : c.type<{ file : File}>(),
+        // body: DocumentSchema
+        //         .pick({ text : true, metadata : true}).array(),
         summary : 'Add a document (admin-only access)'
     },
 },{

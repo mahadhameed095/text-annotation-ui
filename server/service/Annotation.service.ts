@@ -31,7 +31,7 @@ export async function reserveAnnotations(annotatorId : User['id']){
                 SELECT DISTINCT ON ("documentId") "id"
                 FROM "Annotation"
                 WHERE 
-                    "value" IS NULL
+                    ("value" IS NULL OR "value" = 'null')
                     AND "documentId" NOT IN 
                         (SELECT "documentId" FROM "Annotation" WHERE "annotatorId" = ${annotatorId})
                     AND (

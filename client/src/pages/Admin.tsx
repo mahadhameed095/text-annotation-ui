@@ -4,7 +4,7 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Papa from 'papaparse';
 import { useContext, useEffect, useRef, useState } from "react"
-import { Annotation, User } from "../../api.ts";
+import { Annotation, Document, User } from "../../api.ts";
 import { userContext, userContextType } from "@/context";
 import { checkForServerError } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
@@ -20,23 +20,6 @@ type User = {
   hateful : number;
 }
 
-
-const uploadDocuments = (inputFile: any) => {
-  if (inputFile.current !== null) {
-      Papa.parse(inputFile.current.files[0], {
-          complete: (results) => {
-            if (results.data.length > 0) {
-
-            } 
-            else {
-              console.log('CSV file is empty');
-            }
-          },
-          header: true, // Set this to true if your CSV file has a header row
-      });
-  }
-  // e.target ? e.target.value = '' : null;
-}
 
 
 export const columns: ColumnDef<User>[] = [
@@ -73,7 +56,7 @@ export const columns: ColumnDef<User>[] = [
 
 
 export default function Admin() {
-  const inputFile = useRef(null);
+  const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
   const {user} = useContext(userContext) as userContextType;
   const {toast} = useToast();
@@ -84,7 +67,21 @@ export default function Admin() {
     getCoreRowModel: getCoreRowModel(),
   })
 
-  console.log("meow", user)
+  const uploadDocuments = async (file: File) => {
+    console.log("Triggered1");
+    if (!inputFile.current || !user) return;
+    console.log("Triggered2");
+    console.log(file);
+    const res = await Document.add({
+      body : {
+        file
+      },
+      headers : {
+        authorization : `BEARER ${user.token}`
+      }
+    });
+    console.log(res);
+  }
 
   const fetchCounts = () => {
     if (user) {
@@ -108,7 +105,6 @@ export default function Admin() {
         } 
       } as any).then(({status, body}) => {
         checkForServerError(status, toast)
-        console.log("nani", user, body)
         if (status == 200) {
           return body
         }
@@ -208,7 +204,17 @@ export default function Admin() {
           Document Management Panel
           <Button className='ml-1' onClick={()=>{(inputFile.current as any).click()}}>
               Upload Documents
-              <input type='file' id='file' onChange={() => uploadDocuments(inputFile)}  ref={inputFile} style={{display: 'none'}}/>
+              <input 
+                type='file'
+                id='file'
+                onChange={() => {
+                  const file = inputFile.current?.files?.[0];
+                  if(file)
+                    uploadDocuments(file);
+                }}
+                ref={inputFile}
+                style={{display: 'none'}}
+              />
           </Button>
         </CardDescription>
       </CardHeader>

@@ -3,6 +3,8 @@ import * as jwt from 'jsonwebtoken';
 import { UserWithoutPassword } from './schemas';
 import { generateOpenApi } from '@ts-rest/open-api';
 import Env from './ENV';
+import csv from 'csv-parser';
+import { Readable } from 'stream';
 
 export function encrypt(text : string){
     return crypto.createHash('sha256').update(text).digest('hex');
@@ -50,4 +52,26 @@ export function patchOpenAPIDocument(openApiDocument : ReturnType<typeof generat
         implementation.parameters = implementation.parameters.filter((obj : any) => !(obj.name === "authorization" && obj.in === "header"))
       });
     });
+}
+
+
+export function parseCSVBufferToArray<T extends any>(csvBuffer: Buffer) {
+  return new Promise<T[]>((resolve, reject) => {
+    const results : T[] = [];
+    const bufferStream = new Readable();
+    bufferStream.push(csvBuffer);
+    bufferStream.push(null); // Signals the end of data
+    bufferStream
+      .pipe(csv())
+      .on('data', (data) => {
+        // 'data' represents a row in the CSV file
+        results.push(data);
+      })
+      .on('end', () => {
+        resolve(results);
+      })
+      .on('error', (error) => {
+        reject(error);
+      });
+  });
 }
