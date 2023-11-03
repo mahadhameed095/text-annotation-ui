@@ -32,16 +32,13 @@ const AnnotationTool = () => {
         user ? setIsAuthenticated(true) : navigate("/login");
     }, [])
 
-    function getTasks() {
-        console.log("getting tasks...")
+    function fetchInitialTasks() {
+        console.log("getting initial tasks...")
         if (user) {
             return Annotation.getAssignedAnnotations({
                 headers: {
                     authorization: `Bearer ${user.token}`
                 },
-                query : {
-                    take: 10
-                }
             }).then(({status, body}) => {
                 checkForServerError(status, toast);
                 if (status == 200) {
@@ -54,20 +51,36 @@ const AnnotationTool = () => {
                             checkForServerError(status, toast);
                             if (status == 200) {
                                 console.log("reserving tasks...")
-                                return body
+                                return body.sort((a, b) => a.id - b.id)
                             }
                         })
                     }
                     else { 
-                        return body;
+                        return body.sort((a, b) => a.id - b.id);
                     }
                 }
             })
         }
     }
 
+    function fetchMoreTasks() {
+        console.log("getting more tasks...")
+        if (user) {
+            return Annotation.reserveAnnotation({
+                headers: {
+                    authorization: `Bearer ${user.token}`
+                },                        
+            }).then(({status, body}) => {
+                checkForServerError(status, toast);
+                if (status == 200) {
+                    console.log("reserving tasks...")
+                    return body.sort((a, b) => a.id - b.id)
+                }
+            })
+        }
+    }
     
-    function getHistory() {
+    function fetchHistory() {
         console.log("getting history...")
         if (user) {
             return Annotation.getPastAnnotations({
@@ -90,9 +103,10 @@ const AnnotationTool = () => {
 
     useEffect(() => {
         Promise.all([
-            getTasks(),
-            getHistory()
+            fetchInitialTasks(),
+            fetchHistory()
         ]).then(([tasks, history]) => {
+            console.log(tasks);
             if (tasks) {
                 if (history) {
                     data.current = history.reverse()
@@ -119,8 +133,9 @@ const AnnotationTool = () => {
         if (data.current && activeEntryIndex != null) {
             if ((data.current.length-1) - activeEntryIndex < 3) {
                 console.log("fetching more docs....")
-                getTasks()?.then((new_tasks) => {
+                fetchMoreTasks()?.then((new_tasks) => {
                     data.current = data.current.concat(new_tasks as any)
+                    console.log("udpated task list", data.current)
                 })
             }
             if ("value" in data.current[activeEntryIndex]) {
@@ -142,7 +157,7 @@ const AnnotationTool = () => {
             alert("cannot submit because null.");
         else{
             if (data.current && user && activeEntryIndex != null) {
-                Annotation.submitAnnotation({
+                return Annotation.submitAnnotation({
                     headers: {
                         authorization: `Bearer ${user.token}`
                     },

@@ -42,12 +42,3 @@ model Annotation {
   document            Document    @relation(fields: [documentId], references: [id])
   annotator           User?       @relation(fields: [annotatorId], references: [id])
 }
-
-generator zod {
-  provider                         = "zod-prisma-types"
-  writeBarrelFiles                 = false // default is true
-  createInputTypes                 = false // default is true
-  addInputTypeValidation           = false // default is true
-  addIncludeType                   = false // default is true
-  addSelectType                    = false // default is true
-}

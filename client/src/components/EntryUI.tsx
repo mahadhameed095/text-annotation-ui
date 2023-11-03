@@ -6,6 +6,8 @@ import { ClientInferResponseBody } from "@ts-rest/core";
 import { AnnotationContract, Labels } from "api";
 import { CheckCheck } from "lucide-react";
 import { Nullable } from "@/lib/utils";
+import Spinner from "./Spinner";
+import ConfettiExplosion from 'react-confetti-explosion';
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -24,7 +26,7 @@ export default function EntryUI({
 } : { 
     entry : assignedAnnotationType | pastAnnotationType,
     onChange : (labels : Nullable<Labels>) => void;
-    onSubmit : () => void;
+    onSubmit : () => Promise<void> | undefined;
     incrementActiveEntryIndex : () => void;
     decrementActiveEntryIndex : () => void;
     checkDisabled : () => boolean;
@@ -33,6 +35,8 @@ export default function EntryUI({
         islamic : null,
         hateful : null
     });
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isExploding, setIsExploding] = useState<boolean>(false);
     
     useEffect(() => {
         let newLabels;
@@ -63,6 +67,16 @@ export default function EntryUI({
         };
     }
 
+    const onClick = () => {
+        setIsLoading(true);
+        setIsExploding(true)
+        onSubmit()!.then(() => {
+            setIsLoading(false);
+        })
+    }
+
+    console.log("s", isLoading)
+
     useHotkeys('1', onChangeHandler('islamic', true));
     useHotkeys('2', onChangeHandler('islamic', false));
     useHotkeys('3', onChangeHandler('hateful', true));
@@ -89,14 +103,17 @@ export default function EntryUI({
                         </>
                     }
                 </div>
-                <div className="italic">Source: {entry.document.metadata.source}</div>
+                {/* <div className="italic">Source: {entry.document.metadata.source}</div> */}
             </CardHeader>
             <CardContent>
+                {isLoading ? 
+                Spinner({className:"w-8 my-8 mx-auto"})
+                : 
                 <p className="max-h-[calc(100vh-200px)] sm:max-h-[calc(95vh-200px)] overflow-y-auto">{entry.document.text}</p>
-            </CardContent>
+                }
+                </CardContent>
         </Card>
-
-
+        {isExploding && <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none"><ConfettiExplosion duration={1600} force={0.6} height={"50vh"} particleCount={150}onComplete={() => setIsExploding(false)}/></div>}
         <Card className="basis-1/4 mt-4 sm:mt-0">
             <CardHeader>
                 <h1 className="uppercase font-bold text-lg">Annotation</h1>
@@ -160,7 +177,7 @@ export default function EntryUI({
                 <button
                     className="mt-8 p-2 uppercase rounded-md text-sm bg-slate-900 text-white font-semibold"
                     disabled={checkDisabled()}
-                    onClick={onSubmit}
+                    onClick={onClick}
                 >
                     Submit <span>[enter]</span>
                 </button>
