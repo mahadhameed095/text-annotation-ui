@@ -7,7 +7,8 @@ import { Annotation, Document, User } from "../../api.ts";
 import { userContext, userContextType } from "@/context";
 import { checkForServerError } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
-
+import Papa from "papaparse";
+import * as pako from 'pako';
 
 type User = {
   id: number,
@@ -53,6 +54,12 @@ export const columns: ColumnDef<User>[] = [
   },
 ];
 
+type Row = {
+  index: string,
+  Document: string,
+  subreddit: string
+}
+
 
 export default function Admin() {
   const inputFile = useRef<HTMLInputElement>(null);
@@ -67,18 +74,63 @@ export default function Admin() {
   })
 
   const uploadDocuments = async (file: File) => {
-    if (!inputFile.current || !user) return;
+    if (!user) return;
+    if (file.type !== "text/csv") {
+      toast({
+        title: "Invalid File Type",
+        variant: "destructive"
+      })
+      return;
+    };
+    if (file.size >= 104857600) {
+      toast({
+        title: "File Size Limit Exceeded",
+        variant: "destructive",
+        description: "<100mb limit"
+      })
+      return;
+    };
+    console.log("tf?")
     
-    console.log(file);
-    const res = await Document.add({
-      body : {
-        file
+    Papa.parse(file, {
+      complete: (results) => {
+        if (results.data.length > 0) {
+          const acceptedFields : Array<string> = ['index', 'Document', 'subreddit']
+          if (JSON.stringify(results.meta.fields) === JSON.stringify(acceptedFields)) {
+            const transformedResults = results.data.map((original: any) => ({
+              text: original.Document,
+              metadata: {
+                source: original.subreddit,
+              },
+            }));
+
+            const jsonResults = JSON.stringify(transformedResults);
+            const compressedResults = pako.deflate(jsonResults);
+            console.log("done")
+          }
+          else {
+            toast({
+              title: "Invalid File Type",
+              variant: "destructive",
+              description: "incorrect column names"
+            })
+          }
+        } 
+        else {
+          console.log('CSV file is empty');
+        }
       },
-      headers : {
-        authorization : `BEARER ${user.token}`
-      }
-    });
-    console.log(res);
+      header: true,
+  });
+    // const res = await Document.add({
+    //   body : {
+    //     file
+    //   },
+    //   headers : {
+    //     authorization : `BEARER ${user.token}`
+    //   }
+    //  });
+    // console.log(res);
   }
 
   const fetchCounts = () => {
