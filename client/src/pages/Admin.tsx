@@ -67,9 +67,8 @@ export default function Admin() {
   })
 
   const uploadDocuments = async (file: File) => {
-    console.log("Triggered1");
     if (!inputFile.current || !user) return;
-    console.log("Triggered2");
+    
     console.log(file);
     const res = await Document.add({
       body : {

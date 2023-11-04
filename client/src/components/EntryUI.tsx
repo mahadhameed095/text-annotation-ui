@@ -86,7 +86,7 @@ export default function EntryUI({
     <div className="sm:flex sm:space-x-3">
         <Card className="basis-3/4">
             <CardHeader>
-                <div className="flex items-center">
+                <div className="sm:flex items-center">
                     <div className="flex items-center px-1">
                         <Button variant="ghost" onClick={decrementActiveEntryIndex}>
                             &lt;&lt;
@@ -97,11 +97,11 @@ export default function EntryUI({
                         </Button>
                     </div>
                     { "value" in entry &&
-                        <>
+                        <div className="flex text-center">
                             <CheckCheck color="#087500" />
                             <p className="text-green-800 font-bold">Annotated</p>
-                        </>
-                    }
+                        </div>
+                    } 
                 </div>
                 {/* <div className="italic">Source: {entry.document.metadata.source}</div> */}
             </CardHeader>
