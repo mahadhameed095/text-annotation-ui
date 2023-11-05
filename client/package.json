@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
+    "firebase": "^10.5.2",
     "formik": "^2.4.5",
     "lucide-react": "^0.288.0",
     "pako": "^2.1.0",
