@@ -9,6 +9,7 @@ import { checkForServerError } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
 import * as pako from 'pako';
+import Spinner from "@/components/Spinner.tsx";
 
 type User = {
   id: number,
@@ -64,6 +65,7 @@ type Row = {
 export default function Admin() {
   const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const {user} = useContext(userContext) as userContextType;
   const {toast} = useToast();
   
@@ -90,10 +92,11 @@ export default function Admin() {
       })
       return;
     };
-    console.log("tf?")
-    
+
+    setIsProcessing(true);
+
     Papa.parse(file, {
-      complete: (results) => {
+      complete: async (results) => {
         if (results.data.length > 0) {
           const acceptedFields : Array<string> = ['index', 'Document', 'subreddit']
           if (JSON.stringify(results.meta.fields) === JSON.stringify(acceptedFields)) {
@@ -106,7 +109,16 @@ export default function Admin() {
 
             const jsonResults = JSON.stringify(transformedResults);
             const compressedResults = pako.deflate(jsonResults);
-            console.log("done")
+
+            const res = await Document.add({
+              body : {
+                compressedResults
+              },
+              headers : {
+                authorization : `BEARER ${user.token}`
+              }
+             });
+             console.log(res)
           }
           else {
             toast({
@@ -119,18 +131,11 @@ export default function Admin() {
         else {
           console.log('CSV file is empty');
         }
+        setIsProcessing(false);
       },
       header: true,
+      worker: true
   });
-    // const res = await Document.add({
-    //   body : {
-    //     file
-    //   },
-    //   headers : {
-    //     authorization : `BEARER ${user.token}`
-    //   }
-    //  });
-    // console.log(res);
   }
 
   const fetchCounts = () => {
@@ -192,12 +197,11 @@ export default function Admin() {
 
   return (
     <>
+    {isProcessing && <div className="bg-gray-100 bg-opacity-80 z-20 fixed top-0 left-0 w-full h-full flex items-center justify-center inset-0">{Spinner({className:"w-16"})}</div>}
+    
     <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
       <CardHeader>
         <CardTitle>Annotator Overview</CardTitle>
-        {/* <CardDescription className="flex justify-between items-center">
-          Annotators gonna annotate
-        </CardDescription> */}
       </CardHeader>
       <hr/>
       <CardContent className="grid gap-6 py-6">

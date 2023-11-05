@@ -1,4 +1,4 @@
-import { useEffect,  useState } from "react";
+import { useEffect,  useRef,  useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
@@ -7,7 +7,8 @@ import { AnnotationContract, Labels } from "api";
 import { CheckCheck } from "lucide-react";
 import { Nullable } from "@/lib/utils";
 import Spinner from "./Spinner";
-import ConfettiExplosion from 'react-confetti-explosion';
+import useWindowSize from 'react-use/lib/useWindowSize'
+import Confetti from 'react-confetti'
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
@@ -36,7 +37,8 @@ export default function EntryUI({
         hateful : null
     });
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [isExploding, setIsExploding] = useState<boolean>(false);
+    const { width, height } = useWindowSize();
+    let count = useRef<number>(0);
     
     useEffect(() => {
         let newLabels;
@@ -56,6 +58,18 @@ export default function EntryUI({
         onChange(newLabels);     
     }, [entry])
 
+    const celebrate = () => {
+        if (count.current % 5 === 0) {
+            return(
+                <Confetti
+                width={width}
+                height={height}
+                recycle={false}
+                />
+            )
+        }
+    }
+
     const onChangeHandler = (key : keyof Labels, value : boolean) => {
         return () => {
             const newLabels = {
@@ -69,21 +83,21 @@ export default function EntryUI({
 
     const onClick = () => {
         setIsLoading(true);
-        setIsExploding(true)
         onSubmit()!.then(() => {
+            count.current = count.current + 1;
+            celebrate();
             setIsLoading(false);
         })
     }
-
-    console.log("s", isLoading)
 
     useHotkeys('1', onChangeHandler('islamic', true));
     useHotkeys('2', onChangeHandler('islamic', false));
     useHotkeys('3', onChangeHandler('hateful', true));
     useHotkeys('4', onChangeHandler('hateful', false));
     
-    return (
+    return (    
     <div className="sm:flex sm:space-x-3">
+        {celebrate()}
         <Card className="basis-3/4">
             <CardHeader>
                 <div className="sm:flex items-center">
@@ -103,7 +117,6 @@ export default function EntryUI({
                         </div>
                     } 
                 </div>
-                {/* <div className="italic">Source: {entry.document.metadata.source}</div> */}
             </CardHeader>
             <CardContent>
                 {isLoading ? 
@@ -113,7 +126,7 @@ export default function EntryUI({
                 }
                 </CardContent>
         </Card>
-        {isExploding && <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none"><ConfettiExplosion duration={1600} force={0.6} height={"50vh"} particleCount={150}onComplete={() => setIsExploding(false)}/></div>}
+
         <Card className="basis-1/4 mt-4 sm:mt-0">
             <CardHeader>
                 <h1 className="uppercase font-bold text-lg">Annotation</h1>
