@@ -7,7 +7,9 @@ import { Annotation, Document, User } from "../../api.ts";
 import { userContext, userContextType } from "@/context";
 import { checkForServerError } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
-
+import Papa from "papaparse";
+import * as pako from 'pako';
+import Spinner from "@/components/Spinner.tsx";
 
 type User = {
   id: number,
@@ -53,10 +55,17 @@ export const columns: ColumnDef<User>[] = [
   },
 ];
 
+type Row = {
+  index: string,
+  Document: string,
+  subreddit: string
+}
+
 
 export default function Admin() {
   const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const {user} = useContext(userContext) as userContextType;
   const {toast} = useToast();
   
@@ -67,19 +76,66 @@ export default function Admin() {
   })
 
   const uploadDocuments = async (file: File) => {
-    console.log("Triggered1");
-    if (!inputFile.current || !user) return;
-    console.log("Triggered2");
-    console.log(file);
-    const res = await Document.add({
-      body : {
-        file
+    if (!user) return;
+    if (file.type !== "text/csv") {
+      toast({
+        title: "Invalid File Type",
+        variant: "destructive"
+      })
+      return;
+    };
+    if (file.size >= 104857600) {
+      toast({
+        title: "File Size Limit Exceeded",
+        variant: "destructive",
+        description: "<100mb limit"
+      })
+      return;
+    };
+
+    setIsProcessing(true);
+
+    Papa.parse(file, {
+      complete: async (results) => {
+        if (results.data.length > 0) {
+          const acceptedFields : Array<string> = ['index', 'Document', 'subreddit']
+          if (JSON.stringify(results.meta.fields) === JSON.stringify(acceptedFields)) {
+            const transformedResults = results.data.map((original: any) => ({
+              text: original.Document,
+              metadata: {
+                source: original.subreddit,
+              },
+            }));
+
+            const jsonResults = JSON.stringify(transformedResults);
+            const compressedResults = pako.deflate(jsonResults);
+
+            const res = await Document.add({
+              body : {
+                compressedResults
+              },
+              headers : {
+                authorization : `BEARER ${user.token}`
+              }
+             });
+             console.log(res)
+          }
+          else {
+            toast({
+              title: "Invalid File Type",
+              variant: "destructive",
+              description: "incorrect column names"
+            })
+          }
+        } 
+        else {
+          console.log('CSV file is empty');
+        }
+        setIsProcessing(false);
       },
-      headers : {
-        authorization : `BEARER ${user.token}`
-      }
-    });
-    console.log(res);
+      header: true,
+      worker: true
+  });
   }
 
   const fetchCounts = () => {
@@ -141,12 +197,11 @@ export default function Admin() {
 
   return (
     <>
+    {isProcessing && <div className="bg-gray-100 bg-opacity-80 z-20 fixed top-0 left-0 w-full h-full flex items-center justify-center inset-0">{Spinner({className:"w-16"})}</div>}
+    
     <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
       <CardHeader>
         <CardTitle>Annotator Overview</CardTitle>
-        {/* <CardDescription className="flex justify-between items-center">
-          Annotators gonna annotate
-        </CardDescription> */}
       </CardHeader>
       <hr/>
       <CardContent className="grid gap-6 py-6">
