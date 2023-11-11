@@ -21,7 +21,7 @@ const Authentication = () => {
     }, [])
 
     useEffect(() => {
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, async () => {
             auth.currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken) {
                 FetchUserDetails(idToken);
               }).catch(function(error) {
