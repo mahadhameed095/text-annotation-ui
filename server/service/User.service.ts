@@ -1,26 +1,24 @@
 import prismaClient from '../prisma';
-import { User } from '../schemas';
+import { DBUser } from '../schemas';
 
-export async function createUser(name : string, email : string, password : string) : Promise<User> {
-    const user = await prismaClient.user.create({data : {name, email, password}});
+
+export async function createUser(id : string) : Promise<DBUser> {
+    const result = await prismaClient.user.create({ data : { id }});
+    return result;
+}
+
+export async function getUserById(id : string) : Promise<DBUser | null> {
+    const user = await prismaClient.user.findFirst({ where : { id }});
     return user;
 }
 
-export async function getUserByEmail(email : string) : Promise<User | null> {
-    const user = await prismaClient.user.findFirst({ where : { email }});
-    return user;
+export async function approveUser(id : string){
+    await prismaClient.user.update({ where : { id }, data : { approved : true }})
 }
 
-export async function getAllUsers(skip ?: number, take ?: number){
+export async function getAllUsers(ids : string[]){
     const users = await prismaClient.user.findMany({ 
-        skip,
-        take,
-        select : {
-            id : true,
-            name : true,
-            email : true,
-            role : true
-        }
+        where : { id : { in : ids }}
     });
     return users;
 }

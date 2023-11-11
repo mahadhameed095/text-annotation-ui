@@ -1,30 +1,53 @@
-import crypto from 'crypto';
-import * as jwt from 'jsonwebtoken';
-import { UserWithoutPassword } from './schemas';
 import { generateOpenApi } from '@ts-rest/open-api';
-import Env from './ENV';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 
-export function encrypt(text : string){
-    return crypto.createHash('sha256').update(text).digest('hex');
-};
 
-export function generateToken(user : UserWithoutPassword){
-    return jwt.sign({ user }, Env.ACCESS_TOKEN_SECRET) ;
-}
-
-export function decryptToken(token : string) : number{
-    const userId = 0;
-    return userId;
-}
-
-export function removeKeyFromObject<T extends Record<string, any>, K extends keyof T>
+export function omit<T extends Record<string, any>, K extends keyof T>
 (obj : T, key : K) : Omit<T, K>
 {
     const {[key] : _, ...rest} = obj;
     return rest;
 }
+
+type Mask<T> = {
+  [K in keyof T]?: boolean;
+};
+export function pick<T extends Record<any, any>, M extends Mask<T>>(obj : T, mask : M) : Pick<T, keyof M>{
+  const result = Object.keys(mask).reduce((acc, curr) => {
+    acc[curr] = obj[curr];
+    return acc;
+  }, {} as Record<any, any>);
+  return result as any;
+}
+
+export function joinArrays<
+  T extends Record<string, any>,
+  U extends Record<string, any>, 
+  K extends keyof T & keyof U>
+(
+  array1: T[],
+  array2: U[],
+  key: K
+): (T & U)[] {
+  const results = array1.map((item1) => {
+    const matchingItem = array2.find((item2) => (item1[key] === item2[key] as boolean))!;
+    const joined = { ...item1, ...matchingItem };
+    return joined;
+  });
+  return results;
+}
+
+
+// export function removeKeysFromObject<T, M extends Mask<T>>(obj: T, mask : M): Omit<T, keyof M> {
+//   const result: any = { ...obj };
+//   Object.keys(mask).forEach((key) => {
+//       if (mask[key as keyof T]) {
+//           delete result[key];
+//       }
+//   });
+//   return result;
+// }
 
 export function duplicateArray<T extends any[]>(arr : T, n : number) : T {
     return Array.from({ length: n }, () => arr).flat() as T;
