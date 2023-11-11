@@ -1,11 +1,12 @@
 import { createContext } from 'react';
 
 export interface userType {
-    id: number
+    id: string
     name: string;
     email: string;
     role: string;
     token: string;
+    approved: boolean
   }
 
 export interface userContextType {

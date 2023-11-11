@@ -5,16 +5,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useContext, useEffect, useRef, useState } from "react"
 import { Annotation, Document, User } from "../../api.ts";
 import { userContext, userContextType } from "@/context";
-import { checkForServerError } from "@/lib/utils.ts";
+import { checkForServerError, bytesToBase64 } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
 import * as pako from 'pako';
 import Spinner from "@/components/Spinner.tsx";
 
 type User = {
-  id: number,
-  name : string;
-  email :string;
+  id: string,
+  name : string | undefined;
+  email :string | undefined;
   total : number;
   islamic : number;
   non_islamic : number;
@@ -54,12 +54,6 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div className="text-center font-semibold">{row.getValue('hateful')}</div> 
   },
 ];
-
-type Row = {
-  index: string,
-  Document: string,
-  subreddit: string
-}
 
 
 export default function Admin() {
@@ -108,7 +102,7 @@ export default function Admin() {
             }));
 
             const jsonResults = JSON.stringify(transformedResults);
-            const compressedResults = pako.deflate(jsonResults);
+            const compressedResults = bytesToBase64(pako.deflate(jsonResults));
 
             const res = await Document.add({
               body : {
@@ -180,8 +174,9 @@ export default function Admin() {
     ]).then(([users, counts]) => {
       if (users && counts) {
         const combinedList : User[] = [];
+        console.log(users)
 
-        users.forEach(obj1 => {
+        users.users.forEach(obj1 => {
           const matchedObj2 = counts.find(obj2 => obj2.id === obj1.id);
           if (matchedObj2) {
             const combinedObject = { ...obj1, ...matchedObj2 };

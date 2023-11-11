@@ -1,14 +1,13 @@
-import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useEffect, useState }  from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { userContext, userContextType } from '@/context';
 import { useToast } from '@/components/ui/use-toast';
 import Spinner from '@/components/Spinner';
-import { GoogleAuthProvider, IdTokenResult, OAuthCredential, ParsedToken, UserCredential, getIdToken, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/firebase-config';
-import { User } from 'api';
+import { User } from "../../api";
 
 
 const Authentication = () => {
@@ -21,47 +20,57 @@ const Authentication = () => {
         user ? navigate("/") : ""
     }, [])
 
-    // useEffect(() => {
-    //     onAuthStateChanged(auth, async (user) => {
-    //         auth.currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken) {
-    //             // Send token to your backend via HTTPS
-    //             // ...
-    //             console.log(idToken)
-    //           }).catch(function(error) {
-    //             // Handle error
-
-    //           });
-    //     });
-    // }, [])
+    useEffect(() => {
+        onAuthStateChanged(auth, async (user) => {
+            auth.currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken) {
+                FetchUserDetails(idToken);
+              }).catch(function(error) {
+                console.log(error)
+              });
+        });
+    }, [])
   
+    const FetchUserDetails = (accessToken: string) => {
+        User.signIn({
+            body: {
+                token: accessToken
+            }
+        }).then(({status, body}) => {
+            if (status == 200) {
+                console.log(body);
+                login({
+                    id: body.id,
+                    name: body.name ? body.name : "",
+                    email: body.email ? body.email : "",
+                    role: body.role,
+                    token: accessToken,
+                    approved: body.approved
+                });
+                navigate("/");
+            }
+            else {
+                toast({
+                    variant: "destructive",
+                    title: "Login Failed",
+                })
+            }
+        }).catch((err: any) => {
+            toast({
+                variant: "destructive",
+                title: "Unable to establish connection",
+                description: err.message + ' ~ Contact Administrator at k200338@nu.edu.pk',
+            })
+        })
+    }
+
+
     const SignIn = () =>
     {
         setIsLoading(true);
         const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider).then((cred: UserCredential) => {
-            User.signup({
-                body: {
-                    token: string
-                }
-            }).then(({status, body}) => {
-                if (status == 200) {
-                    login(body);
-                    navigate("/");
-                }
-                else {
-                    toast({
-                        variant: "destructive",
-                        title: "Login Failed",
-                        description: body.message,
-                    })
-                }
-            }).catch((err: any) => {
-                toast({
-                    variant: "destructive",
-                    title: "Unable to establish connection",
-                    description: err.message + ' ~ Contact Administrator at k200338@nu.edu.pk',
-                })
-            })
+        signInWithPopup(auth, provider).then((result: any) => {
+            const accessToken = result.user.accessToken
+            FetchUserDetails(accessToken);
         })
         .catch((error: any) => {
             console.log(error)

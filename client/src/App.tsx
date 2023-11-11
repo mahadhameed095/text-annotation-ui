@@ -6,7 +6,9 @@ import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import Header from "./components/Header";
 import { userContext, userType } from "./context";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { auth } from "./firebase-config";
+import { signOut } from "firebase/auth";
 
 export default function App() {
   const [user, setUser] = useState<userType | null>(null);
@@ -16,6 +18,7 @@ export default function App() {
   };
 
   const logout = () => {
+    signOut(auth);
     setUser(null); // Clear user data, effectively logging the user out
   };
 
