@@ -1,44 +1,52 @@
 import { initServer } from "@ts-rest/express";
 import { UserContract } from "../contracts";
 import { UserService } from "../service";
-import { encrypt, generateToken, removeKeyFromObject } from "../utils";
 import { AdminOnly, Auth } from "../middleware";
-import prismaClient from "../prisma";
+
+import { createUser } from "../service/User.service";
+import { joinArrays, pick } from "../utils";
+import { auth } from "../firebaseAuth";
 
 const server = initServer();
  
 const UserController = server.router(UserContract, {
-    register : async ({ body : { email, name, password }}) => {
-      const user = await UserService.getUserByEmail(email);
-      if(user) return { 
-        status : 400,
-        body : { message : "email already exists" }
-      };
-      const createdUser = removeKeyFromObject( //omit password from fetched user
-        await UserService.createUser(name, email, encrypt(password)),
-        'password'
-      );
-      const token = generateToken(createdUser);
-      return { status : 201, body : { ...createdUser, token }};
-    },
-    login : async ({ body : { email, password }}) => {
-      const user = await UserService.getUserByEmail(email);
-      if(!user || user.password !== encrypt(password)) return { 
-        status : 400, 
-        body : { message : "email or password incorrect"}
-      };
-      const userPasswordRemoved = removeKeyFromObject(user, 'password');
-      const token = generateToken(userPasswordRemoved);
-      return {
+    async signIn({ body : { token }}){
+      const firebaseUserData = await auth.verifyIdToken(token);     
+      let user = await UserService.getUserById(firebaseUserData.uid);
+      if(!user)
+        user = await createUser(firebaseUserData.uid);
+
+        return {
         status : 200,
-        body : {...userPasswordRemoved, token}
+        body : { 
+          ...user,
+          ...pick(firebaseUserData, 
+            { email : true, name : true, phone_number : true, picture : true })
+        }
       };
     },
+
+    approve:{
+      middleware : [Auth, AdminOnly],
+      async handler({ body : { id }}){
+        await UserService.approveUser(id);
+        return { status : 200, body : undefined }
+      }
+    },
+    
     listAll : {
       middleware : [Auth, AdminOnly as any],
-      handler : async ({ query }) => {
-        const users = await UserService.getAllUsers(query.skip, query.take);
-        return { status : 200, body : users }
+      async handler({ query : { take, pageToken } }){
+
+        const firebaseUsersListResults = await auth.listUsers(take, pageToken);
+        const firebaseUsers = firebaseUsersListResults.users.map( 
+          user => ({ name : user.displayName, email : user.email, profile : user.photoURL, phone_number : user.phoneNumber, id : user.uid }));
+        
+        const dbUsers = await UserService.getAllUsers(firebaseUsers.map(user => user.id));
+
+        const results = joinArrays(firebaseUsers, dbUsers, 'id');
+
+        return { status : 200, body : { users : results, pageToken : firebaseUsersListResults.pageToken} }
       }
     }
 });

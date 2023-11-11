@@ -17,13 +17,25 @@ export const ValueSchema = z.object({
 
 export const RoleSchema = z.enum(['ADMIN','USER']);
 
-export const UserSchema = z.object({
+export const DBUserSchema = z.object({
+    id: z.string(),    
     role: RoleSchema,
-    id: z.number().int(),
-    name: z.string(),
-    email: z.string(),
-    password: z.string(),
+    approved : z.boolean(),
 });
+
+export type DBUser = z.infer<typeof DBUserSchema>;
+
+export const FirebaseUserSchema = z.object({
+    uid : z.string(),
+    name : z.string().optional(),
+    profile : z.string().optional(),
+    email : z.string().email().optional(),
+    phone_number : z.string().optional()
+});
+
+export type FirebaseUser = z.infer<typeof FirebaseUserSchema>;
+
+export const UserSchema = DBUserSchema.merge(FirebaseUserSchema.omit({ uid : true }));
 
 export type User = z.infer<typeof UserSchema>;
 
@@ -31,7 +43,7 @@ export const AnnotationSchema = z.object({
     id: z.number().int(),
     documentId: z.number().int(),
     value: ValueSchema.nullable(),
-    annotatorId: z.number().int().nullable(),
+    annotatorId: z.string().nullable(),
     annotationTimestamp: z.coerce.date().nullable(),
     assignmentTimestamp: z.coerce.date().nullable(),
 });
@@ -43,9 +55,6 @@ export const DocumentSchema = z.object({
     metadata: JsonSchema,
 });
 export type Document = z.infer<typeof DocumentSchema>;
-
-export const UserWithoutPasswordSchema = UserSchema.omit({ password : true});
-export type UserWithoutPassword = z.infer<typeof UserWithoutPasswordSchema>;
 
 export const DocumentWithoutIdSchema = DocumentSchema.omit({ id : true });
 export type DocumentWithoutId = z.infer<typeof DocumentWithoutIdSchema>;
@@ -85,7 +94,7 @@ export const ValueCountsSchema = z.object({
     islamic : z.coerce.number().int(),
     non_islamic : z.coerce.number().int(),
 });
-export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.number() });
+export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.string() });
 
 export type Value = z.infer<typeof ValueSchema>;
 export type ValueCounts = z.infer<typeof ValueCountsSchema>;

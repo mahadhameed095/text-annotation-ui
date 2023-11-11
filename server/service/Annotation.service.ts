@@ -58,7 +58,7 @@ export async function reserveAnnotations(annotatorId : User['id']){
     }); 
 }
 
-export async function getAssignedAnnotations(annotatorId : number, take ?: number){
+export async function getAssignedAnnotations(annotatorId : string, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
             value : { equals : Prisma.AnyNull },
@@ -74,7 +74,7 @@ export async function getAssignedAnnotations(annotatorId : number, take ?: numbe
     return assigned;
 }
 
-export async function getPastAnnotated(annotatorId : number, take ?: number){
+export async function getPastAnnotated(annotatorId : string, take ?: number){
     const assigned = await prismaClient.annotation.findMany({
         where : {
             value : { not : Prisma.AnyNull },
@@ -92,7 +92,7 @@ export async function getPastAnnotated(annotatorId : number, take ?: number){
     return assigned;
 }
 
-export async function getCounts(annotatorId : number){
+export async function getCounts(annotatorId : string){
     const q = Prisma.sql`
         SELECT
             SUM(CASE WHEN "value" != 'null' AND "value" IS NOT NULL THEN 1 ELSE 0 END) AS total,
@@ -140,7 +140,7 @@ export async function getTotalCounts(){
     return ValueCountsSchema.parse((await prismaClient.$queryRaw<ValueCounts[]>(q))[0]);
 }
 
-export async function getAnnotatedCountOverTime(annotatorId : number, days : number){
+export async function getAnnotatedCountOverTime(annotatorId : string, days : number){
     const q = Prisma.sql`
         SELECT
             date_trunc('day', "annotationTimestamp") AS day,

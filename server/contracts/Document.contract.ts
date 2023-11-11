@@ -8,13 +8,10 @@ const DocumentContract = c.router({
     add: {
         method : 'POST',
         path : '/addDocument',
-        contentType : 'multipart/form-data',
         responses:{
           201 : DocumentSchema.shape.id.array(),
         },
-        body : c.type<{ file : File}>(),
-        // body: DocumentSchema
-        //         .pick({ text : true, metadata : true}).array(),
+        body: z.object({ compressedResults : z.string() }),
         summary : 'Add a document (admin-only access)'
     },
 },{

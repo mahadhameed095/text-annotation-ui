@@ -1,39 +1,40 @@
 import { initContract } from "@ts-rest/core";
-import { UserSchema, UserWithoutPasswordSchema } from "../schemas";
+import { UserSchema } from "../schemas";
 import { z } from "zod";
 
 const c = initContract();
 
 const UserContract = c.router({
-    register: {
+    signIn: {
         method : 'POST',
-        path: '/register',
+        path : '/signIn',
         responses:{
-            400 : c.type<{ message: "email already exists" }>(),
-            201 : UserWithoutPasswordSchema.extend({ token : z.string()})
+            200 : UserSchema
         },
-        body: UserSchema.pick({ name : true, email : true, password : true}),
-        summary : 'Register a user'
+        body: z.object({ token : z.string() }),
+        summary : 'login or register a user'
     },
-    login: {
+    approve: {
         method : 'POST',
-        path : '/login',
-        responses:{
-            400 : c.type<{ message : "email or password incorrect"}>(),
-            200 : UserWithoutPasswordSchema.extend({ token : z.string()})
+        path : '/approve',
+        body : UserSchema.pick({ id : true }),
+        responses: {
+            200 : z.undefined(),
         },
-        body: UserSchema.pick({ email : true, password : true }),
-        summary : 'login a user'
+        summary : 'Approve a user for annotation(admin-only)'
     },
     listAll : {
         method : 'GET',
         path : '/',
         query : z.object({
-            skip : z.coerce.number().optional(),
-            take : z.coerce.number().optional()
+            take : z.coerce.number().max(1000).optional(),
+            pageToken : z.string().optional()
         }),
         responses : {
-            200 : UserWithoutPasswordSchema.array()
+            200 : z.object({ 
+                users: UserSchema.array(),
+                pageToken : z.string().optional()
+            })
         },
         summary : 'Get all users. (admin-only access)'
     }
