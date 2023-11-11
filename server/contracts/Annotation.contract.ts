@@ -83,9 +83,7 @@ const AnnotationContract = c.router({
       method : 'GET',
       path : '/getCountsAllAnnotators',
       responses : {
-        200 : ValueCountsWithIdSchema.extend({
-          id : z.number()
-        }).array()
+        200 : ValueCountsWithIdSchema.array()
       },
       summary : 'Get number of all annotated documents(and the breakdown of each label), for all annotators'
     },
