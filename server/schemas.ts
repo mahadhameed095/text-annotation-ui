@@ -43,7 +43,7 @@ export const AnnotationSchema = z.object({
     id: z.number().int(),
     documentId: z.number().int(),
     value: ValueSchema.nullable(),
-    annotatorId: z.number().int().nullable(),
+    annotatorId: z.string().nullable(),
     annotationTimestamp: z.coerce.date().nullable(),
     assignmentTimestamp: z.coerce.date().nullable(),
 });
@@ -94,7 +94,7 @@ export const ValueCountsSchema = z.object({
     islamic : z.coerce.number().int(),
     non_islamic : z.coerce.number().int(),
 });
-export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.number() });
+export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.string() });
 
 export type Value = z.infer<typeof ValueSchema>;
 export type ValueCounts = z.infer<typeof ValueCountsSchema>;
