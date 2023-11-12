@@ -18,6 +18,7 @@ const UserContract = c.router({
         method : 'POST',
         path : '/approve',
         body : UserSchema.pick({ id : true }),
+        headers : z.object({ authorization : z.string() }),
         responses: {
             200 : z.undefined(),
         },
@@ -26,6 +27,7 @@ const UserContract = c.router({
     listAll : {
         method : 'GET',
         path : '/',
+        headers : z.object({ authorization : z.string() }),
         query : z.object({
             take : z.coerce.number().max(1000).optional(),
             pageToken : z.string().optional()
