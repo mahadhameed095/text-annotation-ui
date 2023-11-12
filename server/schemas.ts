@@ -1,15 +1,5 @@
 import { z } from "zod";
 
-
-export const JsonSchema: z.ZodType = z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.null(),
-    z.record(z.string(), z.any()),
-    z.array(z.any()),
-]);
-
 export const ValueSchema = z.object({
     hateful : z.boolean(),
     islamic : z.boolean()
@@ -52,7 +42,7 @@ export type Annotation = z.infer<typeof AnnotationSchema>;
 export const DocumentSchema = z.object({
     id: z.number().int(),
     text: z.string(),
-    metadata: JsonSchema,
+    metadata: z.any(),
 });
 export type Document = z.infer<typeof DocumentSchema>;
 

@@ -1,8 +1,8 @@
 import { initServer } from "@ts-rest/express";
 import { DocumentContract } from "../contracts";
 import { DocumentService } from "../service";
-import { DocumentSchema } from "../schemas";
 import pako from 'pako';
+import { z } from "zod";
 
 const server = initServer();
 
@@ -12,11 +12,14 @@ const DocumentController = server.router(DocumentContract, {
       const deflatedBuffer = Uint8Array.from(atob(compressedResults), c => c.charCodeAt(0))
       const inflatedData = pako.inflate(deflatedBuffer, { to: 'string' });
       
-      const documents = DocumentSchema
-                          .pick({ text : true, metadata : true})
+      const documents = z.object({ text : z.string(), metadata : z.any().optional()})
+                          .transform( obj => {
+                            if(!obj.metadata) return { text : obj.text, metadata : null };
+                            if(typeof obj.metadata! !== 'object') return { text : obj.text, metadata : { _ : obj.metadata } };
+                            return obj;
+                          })
                           .array()
                           .parse(JSON.parse(inflatedData));
-
       const ids = await DocumentService.createDocuments(documents);
       return { status : 201, body : ids };
     }
