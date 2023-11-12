@@ -59,7 +59,6 @@ const Home = () => {
     
     function fetchCardData() {
       if (user) {
-        console.log("fetching getCardData....")
         return Annotation.getCountsAll({
           headers: {
             authorization: `Bearer ${user.token}`
@@ -80,7 +79,6 @@ const Home = () => {
 
     function fetchAnnotatedCountOverTime() {
       if (user && value && value.match(/\d+/)) {
-        console.log("fetching getAnnotatedCountOverTime....", parseInt(value.match(/\d+/)![0], 10))
         return Annotation.getAnnotatedCountOverTime({
           headers: {
             authorization: `Bearer ${user.token}`
@@ -90,7 +88,6 @@ const Home = () => {
           }
         }).then(({status, body}) => {
           if (status == 200) {
-            console.log("counts over time", body)
             return body;
           }
         })

@@ -11,7 +11,7 @@ import { User } from "../../api";
 
 
 const Authentication = () => {
-    const {user, login} = useContext(userContext) as userContextType;
+    const {user, login, logout} = useContext(userContext) as userContextType;
     const [isLoading, setIsLoading] = useState<Boolean>(false);
     const navigate = useNavigate();
     const { toast } = useToast();
@@ -21,12 +21,20 @@ const Authentication = () => {
     }, [])
 
     useEffect(() => {
-        onAuthStateChanged(auth, async () => {
-            auth.currentUser!.getIdToken(/* forceRefresh */ true).then(function(idToken) {
-                FetchUserDetails(idToken);
-              }).catch(function(error) {
-                console.log(error)
-              });
+        onAuthStateChanged(auth, () => {    
+            if (auth.currentUser) {
+                setIsLoading(true);
+                auth.currentUser.getIdToken(true).then((idToken) => {
+                    FetchUserDetails(idToken);
+                  }).catch((error) => {
+                    console.log(error)
+                });
+                setIsLoading(false);
+            }
+            else {
+                logout();
+                navigate("/login")
+            }
         });
     }, [])
   
@@ -37,7 +45,6 @@ const Authentication = () => {
             }
         }).then(({status, body}) => {
             if (status == 200) {
-                console.log(body);
                 login({
                     id: body.id,
                     name: body.name ? body.name : "",
@@ -69,8 +76,7 @@ const Authentication = () => {
         setIsLoading(true);
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider).then((result: any) => {
-            const accessToken = result.user.accessToken
-            FetchUserDetails(accessToken);
+            FetchUserDetails(result.user.accessToken);
         })
         .catch((error: any) => {
             console.log(error)
