@@ -81,19 +81,20 @@ export default function Admin() {
   const {toast} = useToast();
   const navigate = useNavigate();
 
-  const approveUser = (id: string) => {
+  function approveUser(userId: string) {
+    console.log(user?.token)
     if (user) {
       User.approve({
         headers : {
           authorization : `BEARER ${user.token}`
         },
         body: {
-          id: id
+          id: userId
         }
       }).then(({status}) => {
         if (status == 200) {
           const updatedUsers = users.map(user =>
-            user.id === id ? { ...user, approved: true } : user
+            user.id === userId ? { ...user, approved: true } : user
           );
           setUsers(updatedUsers);
         }

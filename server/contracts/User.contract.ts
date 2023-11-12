@@ -20,7 +20,7 @@ const UserContract = c.router({
         body : UserSchema.pick({ id : true }),
         headers : z.object({ authorization : z.string() }),
         responses: {
-            200 : z.undefined(),
+            200 : z.object({}),
         },
         summary : 'Approve a user for annotation(admin-only)'
     },

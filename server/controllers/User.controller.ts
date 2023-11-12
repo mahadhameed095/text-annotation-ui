@@ -30,7 +30,7 @@ const UserController = server.router(ApiContract.user, {
       middleware : [Auth, AdminOnly],
       async handler({ body : { id }}){
         await UserService.approveUser(id);
-        return { status : 200, body : undefined }
+        return { status : 200, body : {} }
       }
     },
     
