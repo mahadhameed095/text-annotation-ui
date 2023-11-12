@@ -10,20 +10,36 @@ import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
 import pako from 'pako';
 import Spinner from "@/components/Spinner.tsx";
+import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
 
 type User = {
+  profile: string | undefined,
   id: string,
   name : string | undefined;
-  email :string | undefined;
+  email : string | undefined;
+  approved: boolean;
   total : number;
   islamic : number;
   non_islamic : number;
   hateful : number;
 }
 
-
-
 export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "profile",
+    header: () => <div className="text-center"></div>,
+    cell: ({ row }) => <div className="text-center">
+      <Avatar className="h-8 w-8">
+        <AvatarImage src={row.getValue('profile')} alt="@shadcn" />
+      </Avatar>
+    </div> 
+  },
+  {
+    accessorKey: "id",
+    header: () => <div className="text-center">id</div>,
+    cell: ({ row }) => <div className="max-w-[60px] overflow-hidden overflow-ellipsis text-center">{row.getValue('id')}</div> 
+  },
   {
     accessorKey: "name",
     header : "Name"
@@ -57,17 +73,46 @@ export const columns: ColumnDef<User>[] = [
 
 
 export default function Admin() {
+  const [_, setIsAuthenticated] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const {user} = useContext(userContext) as userContextType;
   const {toast} = useToast();
+  const navigate = useNavigate();
+
+  const approveUser = (id: string) => {
+    if (user) {
+      User.approve({
+        headers : {
+          authorization : `BEARER ${user.token}`
+        },
+        body: {
+          id: id
+        }
+      }).then(({status}) => {
+        if (status == 200) {
+          const updatedUsers = users.map(user =>
+            user.id === id ? { ...user, approved: true } : user
+          );
+          setUsers(updatedUsers);
+        }
+      }).catch((error: any) => {
+        console.log(error);
+      })
+    }
+  }
   
+
   const table = useReactTable({
-    data : users,
+    data : users.filter(user => user.approved),
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+
+  useEffect(() => {
+    user ? setIsAuthenticated(true) : navigate("/login");
+  }, [])
 
   const uploadDocuments = async (file: File) => {
     if (!user) return;
@@ -106,7 +151,7 @@ export default function Admin() {
         const validated = results.data.map((item : any) => ({ text : item.text, metadata : item.metadata}));
         const jsonResults = JSON.stringify(validated);
         const compressedResults = bytesToBase64(pako.deflate(jsonResults));
-        console.log({ data : compressedResults.length / (1024 * 1024)});
+        // console.log({ data : compressedResults.length / (1024 * 1024)});
         await Document.add({
           body : {
             compressedResults
@@ -118,7 +163,7 @@ export default function Admin() {
       },
       header: true,
       worker: true
-  });
+    });
   }
 
   const fetchCounts = () => {
@@ -163,21 +208,27 @@ export default function Admin() {
     ]).then(([users, counts]) => {
       if (users && counts) {
         const combinedList : User[] = [];
-        console.log(users)
 
         users.users.forEach(obj1 => {
           const matchedObj2 = counts.find(obj2 => obj2.id === obj1.id);
           if (matchedObj2) {
             const combinedObject = { ...obj1, ...matchedObj2 };
-            const { id, name, email, total, islamic, non_islamic, hateful } = combinedObject;
-            combinedList.push({ id, name, email, total, islamic, non_islamic, hateful });
+            const { profile, id, approved, name, email, total, islamic, non_islamic, hateful } = combinedObject;
+            combinedList.push({ profile, approved, id, name, email, total, islamic, non_islamic, hateful });
           }
         }); 
-
         setUsers(combinedList);
       }
     })
   }, [])
+
+  const handleReset = () => { 
+    if (inputFile.current) { 
+        inputFile.current.value = ""; 
+        inputFile.current.type = "text"; 
+        inputFile.current.type = "file"; 
+    } 
+  }; 
 
   return (
     <>
@@ -236,9 +287,58 @@ export default function Admin() {
     </Card>
 
     <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
-    <CardHeader>
-        <CardTitle>Document Management Panel</CardTitle>
-        <CardDescription className="flex justify-between items-center">
+      <CardHeader>
+        <CardTitle>User Approval Management</CardTitle>
+      </CardHeader>
+           
+      <hr/>
+      <CardContent className="grid gap-6 py-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead></TableHead>
+              <TableHead className="text-center">id</TableHead>
+              <TableHead className="text-center">Name</TableHead>
+              <TableHead className="text-center">Email</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.filter(user => user.approved === false).map((user, userIndex) => (
+              <TableRow key={userIndex}>
+                <td>
+                  <div className="text-center">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.profile} alt="@shadcn" />
+                    </Avatar>
+                  </div> 
+                </td>
+                <td>
+                  <div className="max-w-[60px] overflow-hidden overflow-ellipsis text-center">{user.id}</div> 
+                </td>
+                <td>
+                  <div className="text-center">{user.name}</div> 
+                </td>
+                <td>
+                  <div className="text-center">{user.email}</div> 
+                </td>
+                <td>
+                  <Button className="bg-green-700 text-white" onClick={() => approveUser(user.id)}>Approve</Button>
+                </td>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+
+    <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
+      <CardHeader>
+          <CardTitle>Document Management Panel</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="justify-between items-center">
+          <p>CSV file is expected to have text column and a metadata column (optional). This Feature is PC-only.</p>
           <Button className='m-2 ml-auto' onClick={()=>{(inputFile.current as any).click()}}>
               Upload Documents
               <input 
@@ -248,8 +348,10 @@ export default function Admin() {
                   const file = inputFile.current?.files?.[0];
                   if(file){
                     setIsProcessing(true);
-                    uploadDocuments(file).then(() => 
-                    setIsProcessing(false));
+                    uploadDocuments(file).then(() => {
+                      setIsProcessing(false);
+                      handleReset();
+                    });
                   }
                 }}
                 ref={inputFile}
@@ -257,7 +359,7 @@ export default function Admin() {
               />
           </Button>
         </CardDescription>
-      </CardHeader>
+      </CardContent>
     </Card>
   </>
   )
