@@ -1,10 +1,10 @@
 import { initServer } from "@ts-rest/express";
-import { AnnotationContract } from "../contracts";
+import ApiContract from "../contracts";
 import { AnnotationService } from "../service";
 import { AdminOnly } from "../middleware";
 
 const server = initServer();
-const DocumentController = server.router(AnnotationContract, {
+const DocumentController = server.router(ApiContract.annotation, {
     submitAnnotation : async ({ body : { value, id }, req : { user }}) => {
         await AnnotationService.submitAnnotation(id, user.id, value);
         return { status : 200, body : {} };

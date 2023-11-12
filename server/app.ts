@@ -2,7 +2,7 @@ import { createExpressEndpoints } from '@ts-rest/express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import * as Contracts from "./contracts";
+import ApiContract from "./contracts";
 import * as Controllers from "./controllers";
 import { AdminOnly, Auth } from './middleware';
 import { generateOpenApi } from '@ts-rest/open-api';
@@ -13,27 +13,27 @@ import Env from './ENV';
 const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json({ limit : '30mb'}));
 
 createExpressEndpoints(
-  Contracts.UserContract,
+  ApiContract.user,
   Controllers.UserController,
-  app
+  app,
+  { globalMiddleware : [bodyParser.json()]}
 );
 createExpressEndpoints(
-  Contracts.DocumentContract,
+  ApiContract.document,
   Controllers.DocumentController,
   app,
-  { globalMiddleware : [Auth, AdminOnly] }
+  { globalMiddleware : [bodyParser.json({ limit : '30mb'}), Auth, AdminOnly] }
 );
 createExpressEndpoints(
-  Contracts.AnnotationContract,
+  ApiContract.annotation,
   Controllers.AnnotationController,
   app,
-  { globalMiddleware : [Auth] }
+  { globalMiddleware : [bodyParser.json(), Auth] }
 );
 
-const openApiDocument = generateOpenApi(Contracts.ApiContract, {
+const openApiDocument = generateOpenApi(ApiContract, {
   info: {
     title: 'API',
     version: '1.0.0',
@@ -42,8 +42,15 @@ const openApiDocument = generateOpenApi(Contracts.ApiContract, {
 });
 
 patchOpenAPIDocument(openApiDocument);
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+
+const distPath = '../client/dist';
+app.use('/', express.static(distPath));
+
+app.get('/*', (req, res) => {
+  res.sendFile('index.html', { root : distPath});
+});
+
 
 app.listen(Env.PORT, () => {
   console.log(`Server is running on port ${Env.PORT}`);

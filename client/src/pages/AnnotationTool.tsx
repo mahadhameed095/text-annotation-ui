@@ -1,15 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react"
 import { useHotkeys } from 'react-hotkeys-hook'
 import EntryUI from "../components/EntryUI";
-import { Annotation, AnnotationContract, Labels } from "../../api.ts";
+import { Annotation, Labels, ApiContract } from "../../api.ts";
 import { useNavigate } from "react-router-dom";
 import { userContextType, userContext } from "@/context.ts";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { Nullable, checkForServerError } from "@/lib/utils.ts";
 import { useToast } from '@/components/ui/use-toast';
 
-type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
-type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
+type assignedAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getAssignedAnnotations'], 200> 
+type pastAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getPastAnnotations'], 200>
 type UnwrapArray<T> = T extends (infer U)[] ? U : T;
 
 type assignedAnnotationType = UnwrapArray<assignedAnnotationTypeArray>;

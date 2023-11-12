@@ -21,7 +21,7 @@ export default function App() {
 
   return (
     <userContext.Provider value={{user, login, logout}}>
-      <Router basename='/text-annotation-ui/'>
+      <Router>
           <Toaster/>
           <Header />
           <div className="max-w-screen-2xl mx-auto min-h-[calc(100vh - 64px)]">

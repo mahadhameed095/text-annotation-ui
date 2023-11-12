@@ -3,15 +3,15 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
 import { ClientInferResponseBody } from "@ts-rest/core";
-import { AnnotationContract, Labels } from "api";
+import { ApiContract, Labels } from "api";
 import { CheckCheck } from "lucide-react";
 import { Nullable } from "@/lib/utils";
 import Spinner from "./Spinner";
 import useWindowSize from 'react-use/lib/useWindowSize'
 import Confetti from 'react-confetti'
 
-type assignedAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getAssignedAnnotations'], 200> 
-type pastAnnotationTypeArray = ClientInferResponseBody<typeof AnnotationContract['getPastAnnotations'], 200>
+type assignedAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getAssignedAnnotations'], 200> 
+type pastAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getPastAnnotations'], 200>
 type UnwrapArray<T> = T extends (infer U)[] ? U : T;
 
 type assignedAnnotationType = UnwrapArray<assignedAnnotationTypeArray>;

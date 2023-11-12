@@ -97,6 +97,7 @@ const AnnotationContract = c.router({
     }
   },
   {
+    pathPrefix : '/annotations',
     strictStatusCodes : true,
     baseHeaders : z.object({
         authorization : z.string()

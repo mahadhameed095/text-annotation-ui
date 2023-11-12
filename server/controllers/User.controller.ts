@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { UserContract } from "../contracts";
+import ApiContract from "../contracts";
 import { UserService } from "../service";
 import { AdminOnly, Auth } from "../middleware";
 
@@ -9,7 +9,7 @@ import { auth } from "../firebaseAuth";
 
 const server = initServer();
  
-const UserController = server.router(UserContract, {
+const UserController = server.router(ApiContract.user, {
     async signIn({ body : { token }}){
       const firebaseUserData = await auth.verifyIdToken(token);     
       let user = await UserService.getUserById(firebaseUserData.uid);

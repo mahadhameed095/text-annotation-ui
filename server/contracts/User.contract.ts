@@ -41,7 +41,8 @@ const UserContract = c.router({
         summary : 'Get all users. (admin-only access)'
     }
 }, {
-    strictStatusCodes : true
+    pathPrefix : '/users',
+    strictStatusCodes : true,
 });
 
 export default UserContract;

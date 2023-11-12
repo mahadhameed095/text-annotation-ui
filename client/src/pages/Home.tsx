@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
-import { Annotation, AnnotationContract } from "../../api.ts";
+import { Annotation, ApiContract } from "../../api.ts";
 import { userContext, userContextType } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
 import Spinner from '@/components/Spinner.tsx';
@@ -25,7 +25,7 @@ const frameworks = [
   ]
 
 
-type AnnotationContractType = ClientInferResponseBody<typeof AnnotationContract['getAnnotatedCountOverTime'], 200> 
+type AnnotationContractType = ClientInferResponseBody<typeof ApiContract['annotation']['getAnnotatedCountOverTime'], 200> 
 
 type AnnotaterStatistics = {
   labels: {

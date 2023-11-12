@@ -1,9 +1,9 @@
 import { ClientInferResponseBody } from "@ts-rest/core";
-import { AnnotationContract } from "api";
+import { ApiContract } from "api";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
 
-type AnnotationContractType = ClientInferResponseBody<typeof AnnotationContract['getAnnotatedCountOverTime'], 200> 
+type AnnotationContractType = ClientInferResponseBody<typeof ApiContract['annotation']['getAnnotatedCountOverTime'], 200> 
 
 interface Props {
   data: AnnotationContractType | undefined

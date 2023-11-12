@@ -15,6 +15,7 @@ const DocumentContract = c.router({
         summary : 'Add a document (admin-only access)'
     },
 },{
+    pathPrefix : '/documents',
     strictStatusCodes : true,
     baseHeaders : z.object({
         authorization : z.string()

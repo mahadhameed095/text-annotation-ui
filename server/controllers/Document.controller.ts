@@ -1,12 +1,12 @@
 import { initServer } from "@ts-rest/express";
-import { DocumentContract } from "../contracts";
+import ApiContract from "../contracts";
 import { DocumentService } from "../service";
 import pako from 'pako';
 import { z } from "zod";
 
 const server = initServer();
 
-const DocumentController = server.router(DocumentContract, {
+const DocumentController = server.router(ApiContract.document, {
   add : {
     handler : async ({ body : { compressedResults } }) => {
       const deflatedBuffer = Uint8Array.from(atob(compressedResults), c => c.charCodeAt(0))
