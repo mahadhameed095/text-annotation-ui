@@ -11,6 +11,7 @@ const DocumentController = server.router(DocumentContract, {
     handler : async ({ body : { compressedResults } }) => {
       const deflatedBuffer = Uint8Array.from(atob(compressedResults), c => c.charCodeAt(0))
       const inflatedData = pako.inflate(deflatedBuffer, { to: 'string' });
+      
       const documents = DocumentSchema
                           .pick({ text : true, metadata : true})
                           .array()

@@ -8,7 +8,7 @@ import { userContext, userContextType } from "@/context";
 import { checkForServerError, bytesToBase64 } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
-import * as pako from 'pako';
+import pako from 'pako';
 import Spinner from "@/components/Spinner.tsx";
 
 type User = {
@@ -87,45 +87,34 @@ export default function Admin() {
       return;
     };
 
-    setIsProcessing(true);
-
     Papa.parse(file, {
       complete: async (results) => {
-        if (results.data.length > 0) {
-          const acceptedFields : Array<string> = ['index', 'Document', 'subreddit']
-          if (JSON.stringify(results.meta.fields) === JSON.stringify(acceptedFields)) {
-            const transformedResults = results.data.map((original: any) => ({
-              text: original.Document,
-              metadata: {
-                source: original.subreddit,
-              },
-            }));
-
-            const jsonResults = JSON.stringify(transformedResults);
-            const compressedResults = bytesToBase64(pako.deflate(jsonResults));
-
-            const res = await Document.add({
-              body : {
-                compressedResults
-              },
-              headers : {
-                authorization : `BEARER ${user.token}`
-              }
-             });
-             console.log(res)
-          }
-          else {
-            toast({
-              title: "Invalid File Type",
-              variant: "destructive",
-              description: "incorrect column names"
-            })
-          }
-        } 
-        else {
-          console.log('CSV file is empty');
+        if (results.data.length === 0) {
+          toast({
+            title : 'The CSV is empty'
+          });
+          return;
         }
-        setIsProcessing(false);
+        if(!results.meta.fields?.includes('text')){
+          toast({
+            title: "Incorrect file format",
+            variant: "destructive",
+            description: `'text' field is missing`
+          });
+          return; 
+        }
+        const validated = results.data.map((item : any) => ({ text : item.text, metadata : item.metadata}));
+        const jsonResults = JSON.stringify(validated);
+        const compressedResults = bytesToBase64(pako.deflate(jsonResults));
+        console.log({ data : compressedResults.length / (1024 * 1024)});
+        await Document.add({
+          body : {
+            compressedResults
+          },
+          headers : {
+            authorization : `BEARER ${user.token}`
+          }
+        });
       },
       header: true,
       worker: true
@@ -257,8 +246,11 @@ export default function Admin() {
                 id='file'
                 onChange={() => {
                   const file = inputFile.current?.files?.[0];
-                  if(file)
-                    uploadDocuments(file);
+                  if(file){
+                    setIsProcessing(true);
+                    uploadDocuments(file).then(() => 
+                    setIsProcessing(false));
+                  }
                 }}
                 ref={inputFile}
                 style={{display: 'none'}}
