@@ -59,11 +59,11 @@ export default function EntryUI({
     }, [entry])
 
     const celebrate = () => {
-        if (count.current % 5 === 0) {
+        if (count.current % 10 === 0 && count.current !== 0) {
             return(
                 <Confetti
-                width={width}
-                height={height}
+                width={width - 40}
+                height={height - 40}
                 recycle={false}
                 />
             )
@@ -84,8 +84,10 @@ export default function EntryUI({
     const onClick = () => {
         setIsLoading(true);
         onSubmit()!.then(() => {
+            if (count.current !== 0) {
+                celebrate();
+            }
             count.current = count.current + 1;
-            celebrate();
             setIsLoading(false);
         })
     }

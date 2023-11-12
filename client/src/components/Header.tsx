@@ -15,7 +15,7 @@ const Header = () => {
                 </Link>
             </div>
             <div className="ml-auto flex items-center space-x-4 px-6">
-                {user && <UserNav name={user.name} email={user.email} />}
+                {user && <UserNav name={user.name} email={user.email}/>}
             </div>   
         </header>   
         </>
