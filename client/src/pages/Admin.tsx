@@ -4,7 +4,7 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useContext, useEffect, useRef, useState } from "react"
 import { Annotation, Document, User } from "../../api.ts";
-import { userContext, userContextType } from "@/context";
+import { useAuth, userContextType } from "@/context";
 import { checkForServerError, bytesToBase64 } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
@@ -77,7 +77,7 @@ export default function Admin() {
   const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const {user} = useContext(userContext) as userContextType;
+  const {user} = useAuth();
   const {toast} = useToast();
   const navigate = useNavigate();
 

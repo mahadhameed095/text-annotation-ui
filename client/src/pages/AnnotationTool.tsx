@@ -1,9 +1,9 @@
-import { useContext, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useHotkeys } from 'react-hotkeys-hook'
 import EntryUI from "../components/EntryUI";
 import { Annotation, Labels, ApiContract } from "../../api.ts";
 import { useNavigate } from "react-router-dom";
-import { userContextType, userContext } from "@/context.ts";
+import { useAuth } from "@/context";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { Nullable, checkForServerError } from "@/lib/utils.ts";
 import { useToast } from '@/components/ui/use-toast';
@@ -17,7 +17,7 @@ type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 
 const AnnotationTool = () => {
-    const {user} = useContext(userContext) as userContextType;
+    const {user} = useAuth();
     const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
@@ -30,10 +30,9 @@ const AnnotationTool = () => {
 
     useEffect(() => {
         user ? setIsAuthenticated(true) : navigate("/login");
-    }, [])
+      }, [user])
 
     function fetchInitialTasks() {
-        console.log("getting initial tasks...")
         if (user) {
             return Annotation.getAssignedAnnotations({
                 headers: {
