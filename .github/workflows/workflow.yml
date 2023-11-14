@@ -7,8 +7,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'server/**/*'
   workflow_dispatch:
 
 jobs:
@@ -24,7 +22,7 @@ jobs:
           node-version: '18.x'
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./server/* -r
+        run: zip -r release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
