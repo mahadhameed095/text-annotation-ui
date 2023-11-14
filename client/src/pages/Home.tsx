@@ -9,7 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/u
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
 import { Annotation, ApiContract } from "../../api.ts";
-import { userContext, userContextType } from '@/context';
+import { useAuth, userContextType } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
 import Spinner from '@/components/Spinner.tsx';
 
@@ -53,7 +53,7 @@ const Home = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
-    const {user} = useContext(userContext) as userContextType;
+    const {user} = useAuth();
     const [data, setData] = useState<AnnotaterStatistics | null>(null);
     const navigate = useNavigate();
     
@@ -109,9 +109,6 @@ const Home = () => {
       }
     }
 
-    useEffect(() => {
-      user ? setIsAuthenticated(true) : navigate("/login");
-    }, [])
 
     useEffect(() => {
       Promise.all([
@@ -218,7 +215,7 @@ const Home = () => {
 
     return ( 
         <>
-          {isAuthenticated ?
+          {user ?
           <>
             {data ? 
             <div className='mx-auto p-2 sm:p-6 md:p-10'>

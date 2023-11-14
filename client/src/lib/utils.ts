@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { useToast } from "@/components/ui/use-toast"
+import { User } from "api"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -47,3 +48,4 @@ export function bytesToBase64(bytes: Uint8Array) {
 }
 
 export type Nullable<T extends Record<string, any>> = {[K in keyof T] : T[K] | null};
+
