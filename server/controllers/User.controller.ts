@@ -33,20 +33,30 @@ const UserController = server.router(ApiContract.user, {
         return { status : 200, body : {} }
       }
     },
-    
-    listAll : {
+    listApproved : {
       middleware : [Auth, AdminOnly as any],
-      async handler({ query : { take, pageToken } }){
+      async handler({ query : { take, skip } }){
 
-        const firebaseUsersListResults = await auth.listUsers(take, pageToken);
+        const dbUsers = await UserService.getAllApprovedUsers(skip, take);
+        const firebaseUsersListResults = await auth.getUsers(dbUsers.map(user => ({ uid : user.id })));
         const firebaseUsers = firebaseUsersListResults.users.map( 
-          user => ({ name : user.displayName, email : user.email, profile : user.photoURL, phone_number : user.phoneNumber, id : user.uid }));
-        
-        const dbUsers = await UserService.getAllUsers(firebaseUsers.map(user => user.id));
-
+          user => ({ name : user.displayName, email : user.email, profile : user.photoURL, phone_number : user.phoneNumber, id : user.uid })
+        );
         const results = joinArrays(firebaseUsers, dbUsers, 'id');
+        return { status : 200, body : results };
+      }
+    },
+    listUnapproved : {
+      middleware : [Auth, AdminOnly as any],
+      async handler({ query : { take, skip } }){
 
-        return { status : 200, body : { users : results, pageToken : firebaseUsersListResults.pageToken} }
+        const dbUsers = await UserService.getAllUnapprovedUsers(skip, take);
+        const firebaseUsersListResults = await auth.getUsers(dbUsers.map(user => ({ uid : user.id })));
+        const firebaseUsers = firebaseUsersListResults.users.map( 
+          user => ({ name : user.displayName, email : user.email, profile : user.photoURL, phone_number : user.phoneNumber, id : user.uid })
+        );
+        const results = joinArrays(firebaseUsers, dbUsers, 'id');
+        return { status : 200, body : results };
       }
     }
 });

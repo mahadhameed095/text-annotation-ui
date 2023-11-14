@@ -29,11 +29,13 @@ export function joinArrays<
   array1: T[],
   array2: U[],
   key: K
-): (T & U)[] {
-  const results = array1.map((item1) => {
-    const matchingItem = array2.find((item2) => (item1[key] === item2[key] as boolean))!;
-    const joined = { ...item1, ...matchingItem };
-    return joined;
+)  {
+  const results : (T & U)[] = [];
+  array1.forEach((item1) => {
+    const matchingItem = array2.find((item2) => (item1[key] === item2[key] as boolean));
+    if(matchingItem){
+      results.push({...item1, ...matchingItem});
+    }
   });
   return results;
 }
