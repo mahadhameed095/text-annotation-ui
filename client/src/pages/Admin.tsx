@@ -25,6 +25,16 @@ type User = {
   hateful : number;
 }
 
+type UserSchema = {
+  id: string;
+  role: "ADMIN" | "USER";
+  approved: boolean;
+  name?: string | undefined;
+  profile?: string | undefined;
+  email?: string | undefined;
+  phone_number?: string | undefined;
+}[]
+
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "profile",
@@ -185,9 +195,30 @@ export default function Admin() {
     }
   }
 
-  const fetchAnnotaters = () => {
+  const fetchApprovedAnnotaters = () => {
     if (user) {
-      return User.listAll({
+      return User.listApproved({
+        headers: {
+          authorization: `Bearer ${user.token}`
+        } 
+      } as any).then(({status, body}) => {
+        checkForServerError(status, toast)
+        if (status == 200) {
+          return body
+        }
+        else if (status == 400) {
+          toast({
+            variant: "destructive",
+            title: "Authorization Error",
+          })
+        }
+      })
+    }
+  }
+
+  const fetchUnapprovedUsers = () => {
+    if (user) {
+      return User.listUnapproved({
         headers: {
           authorization: `Bearer ${user.token}`
         } 
@@ -208,13 +239,15 @@ export default function Admin() {
 
   useEffect(() => {
     Promise.all([
-      fetchAnnotaters(),
+      fetchApprovedAnnotaters(),
+      fetchUnapprovedUsers(),
       fetchCounts()
-    ]).then(([users, counts]) => {
-      if (users && counts) {
+    ]).then(([approvedUsers, unapprovedUsers, counts]) => {
+      if (approvedUsers && unapprovedUsers && counts) {
+        const combinedUsers : UserSchema = [...approvedUsers, ...unapprovedUsers];
         const combinedList : User[] = [];
-
-        users.users.forEach(obj1 => {
+      
+        combinedUsers.forEach(obj1 => {
           const matchedObj2 = counts.find(obj2 => obj2.id === obj1.id);
           if (matchedObj2) {
             const combinedObject = { ...obj1, ...matchedObj2 };
