@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build" :"npm run build --client && npm run build --server",
-    "start" : "npm start --prefix server"
+    "build": "cd server && npm run build && cd ../client && npm run build",
+    "start" : "npm start --prefix server",
+    "deploy" : "npm run deploy --prefix server"
   },
   "author": "",
   "license": "ISC"

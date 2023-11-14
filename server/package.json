@@ -6,7 +6,7 @@
   "scripts": {
     "deploy": "prisma migrate deploy && npm start",
     "start": "node dist/app.js",
-    "build": "prisma generate && tsc",
+    "build": "npm install && prisma generate && tsc",
     "dev": "nodemon app.ts",
     "prisma-studio": "prisma studio",
     "test": "echo \"Error: no test specified\" && exit 1"
