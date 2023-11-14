@@ -26,11 +26,11 @@ const UserContract = c.router({
     },
     listApproved : {
         method : 'GET',
-        path : '/listApproved',
+        path : '/approved',
         headers : z.object({ authorization : z.string() }),
         query : z.object({
             take : z.coerce.number().max(100).optional(),
-            skip : z.coerce.number().int()
+            skip : z.coerce.number().int().optional()
         }),
         responses : {
             200 : UserSchema.array()
@@ -39,11 +39,11 @@ const UserContract = c.router({
     },
     listUnapproved : {
         method : 'GET',
-        path : '/listUnapproved',
+        path : '/unapproved',
         headers : z.object({ authorization : z.string() }),
         query : z.object({
             take : z.coerce.number().max(100).optional(),
-            skip : z.coerce.number().int()
+            skip : z.coerce.number().int().optional()
         }),
         responses : {
             200 : UserSchema.array()

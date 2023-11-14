@@ -201,6 +201,5 @@ export async function getConflictingRows(){
 	    "documentId"
     HAVING
 	    COUNT(DISTINCT "value"->>'islamic') > 1;`
-    console.log("Hello1");
     return await prismaClient.$queryRaw<ConflictingDocument[]>(sql);
 }
