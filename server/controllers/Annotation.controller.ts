@@ -41,6 +41,15 @@ const DocumentController = server.router(ApiContract.annotation, {
     getTotalCount : async () => {
         const results = await AnnotationService.getTotalCounts();
         return { status : 200, body: results };
+    },
+    getConflictingRows : {
+        middleware : [AdminOnly],
+        handler : async () => {
+            return { 
+                status : 200,
+                body : await AnnotationService.getConflictingRows()
+            };
+        }
     }
 });
 

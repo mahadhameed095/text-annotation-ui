@@ -89,3 +89,14 @@ export const ValueCountsWithIdSchema = ValueCountsSchema.extend({ id : z.string(
 export type Value = z.infer<typeof ValueSchema>;
 export type ValueCounts = z.infer<typeof ValueCountsSchema>;
 export type ValueCountsWithId = z.infer<typeof ValueCountsWithIdSchema>;
+
+
+export const ConflictingDocumentSchema = z.object({
+    documentId : z.number(),
+    conflicts : z.object({
+      annotationId : z.number(),
+      islamic : z.boolean()
+    }).array()
+});
+
+export type ConflictingDocument = z.infer<typeof ConflictingDocumentSchema>;

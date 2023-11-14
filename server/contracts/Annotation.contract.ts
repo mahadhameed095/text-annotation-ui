@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
-import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema, ValueCountsWithIdSchema } from "../schemas";
+import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema, ValueCountsWithIdSchema, ConflictingDocumentSchema } from "../schemas";
 import { z } from "zod";
+import { response } from "express";
 
 const c = initContract();
 
@@ -85,7 +86,7 @@ const AnnotationContract = c.router({
       responses : {
         200 : ValueCountsWithIdSchema.array()
       },
-      summary : 'Get number of all annotated documents(and the breakdown of each label), for all annotators'
+      summary : 'Get number of all annotated documents(and the breakdown of each label), for all annotators (admin-only action)'
     },
     getTotalCount : {
       method : 'GET',
@@ -94,6 +95,14 @@ const AnnotationContract = c.router({
         200 : ValueCountsSchema
       },
       summary : 'Get total number of hateful, and islamic documents annotated over all dataset'
+    },
+    getConflictingRows : {
+      method : 'GET',
+      path : '/conflicting',
+      responses : {
+        200 : ConflictingDocumentSchema.array()
+      },
+      summary : 'Get all documents with conflicts in their annotations(not all labels are same for the documents) (admin-only action)' 
     }
   },
   {
