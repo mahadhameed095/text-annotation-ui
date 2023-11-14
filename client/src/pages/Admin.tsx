@@ -10,7 +10,6 @@ import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
 import pako from 'pako';
 import Spinner from "@/components/Spinner.tsx";
-import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
 
 type User = {
