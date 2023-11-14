@@ -1,7 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { DocumentSchema, AnnotationSchema, AssignedAnnotationSchema, ValueCountsSchema, ValueSchema, ValueCountsWithIdSchema, ConflictingDocumentSchema } from "../schemas";
 import { z } from "zod";
-import { response } from "express";
 
 const c = initContract();
 
