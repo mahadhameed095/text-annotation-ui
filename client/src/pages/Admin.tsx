@@ -35,6 +35,14 @@ type UserSchema = {
   phone_number?: string | undefined;
 }[]
 
+type AnnotationConflict = {
+  documentId: number;
+  conflicts: {
+      islamic: boolean;
+      annotationId: number;
+  }[];
+}[];
+
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "profile",
@@ -83,17 +91,15 @@ export const columns: ColumnDef<User>[] = [
 
 
 export default function Admin() {
-  const [_, setIsAuthenticated] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [annotationConflicts, setAnntationConflicts] = useState<AnnotationConflict>([]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const {user} = useAuth();
   const {toast} = useToast();
-  const navigate = useNavigate();
 
 
   function approveUser(userId: string) {
-    console.log(user?.token)
     if (user) {
       User.approve({
         headers : {
@@ -124,10 +130,6 @@ export default function Admin() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-
-  useEffect(() => {
-    user ? setIsAuthenticated(true) : navigate("/login");
-  }, [])
 
   const uploadDocuments = async (file: File) => {
     if (!user) return;
@@ -237,6 +239,26 @@ export default function Admin() {
     }
   }
 
+  const fetchAnnotationConflicts = () => {
+    if (user) {
+      return Annotation.getConflictingRows({
+        headers: {
+          authorization: `Bearer ${user.token}`
+        } 
+      }).then(({status, body}) => {
+        if (status == 200) {
+          return body
+        }
+        else if (status == 400) {
+          toast({
+            variant: "destructive",
+            title: "Authorization Error",
+          })
+        }
+      })
+    }
+  }
+
   useEffect(() => {
     Promise.all([
       fetchApprovedAnnotaters(),
@@ -260,6 +282,16 @@ export default function Admin() {
     })
   }, [])
 
+  useEffect(() => {
+    fetchAnnotationConflicts()?.then((data) => {
+      console.log("searching for conflicts...")
+      if (data) {
+        console.log("found conflicts...")
+        setAnntationConflicts(data);
+      }
+    })
+  }, [])
+
   const handleReset = () => { 
     if (inputFile.current) { 
         inputFile.current.value = ""; 
@@ -267,8 +299,6 @@ export default function Admin() {
         inputFile.current.type = "file"; 
     } 
   }; 
-
-  console.log(users.filter(user => user.approved === false))
 
   return (
     <>
@@ -404,6 +434,15 @@ export default function Admin() {
               />
           </Button>
         </CardDescription>
+      </CardContent>
+    </Card>
+
+    <Card className="max-w-[800px] m-3 sm:m-6 md:mx-auto border mt-16 shadow-md rounded-md">
+      <CardHeader>
+        <CardTitle>Conflict Management</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="text-white bg-red-500 rounded-md p-3 text-md">{annotationConflicts.length} conflicts detected</CardDescription>
       </CardContent>
     </Card>
   </>

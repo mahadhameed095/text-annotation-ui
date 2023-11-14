@@ -26,7 +26,7 @@ const UserContract = c.router({
     },
     listApproved : {
         method : 'GET',
-        path : '/',
+        path : '/listApproved',
         headers : z.object({ authorization : z.string() }),
         query : z.object({
             take : z.coerce.number().max(100).optional(),
@@ -39,7 +39,7 @@ const UserContract = c.router({
     },
     listUnapproved : {
         method : 'GET',
-        path : '/',
+        path : '/listUnapproved',
         headers : z.object({ authorization : z.string() }),
         query : z.object({
             take : z.coerce.number().max(100).optional(),
