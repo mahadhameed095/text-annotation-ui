@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Overview } from '@/components/Overview';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem } from "@/components/u
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from '@/lib/utils';
 import { Annotation, ApiContract } from "../../api.ts";
-import { useAuth, userContextType } from '@/context';
+import { useAuth } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
 import Spinner from '@/components/Spinner.tsx';
 
@@ -23,7 +23,6 @@ const frameworks = [
       label: "Last 30 Days",
     },
   ]
-
 
 type AnnotationContractType = ClientInferResponseBody<typeof ApiContract['annotation']['getAnnotatedCountOverTime'], 200> 
 
@@ -50,7 +49,6 @@ type getCatdDataProps = {
 }
 
 const Home = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [open, setOpen] = useState<boolean>(false);
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useAuth();
@@ -215,7 +213,7 @@ const Home = () => {
 
     return ( 
         <>
-          {user ?
+          {user?.approved ?
           <>
             {data ? 
             <div className='mx-auto p-2 sm:p-6 md:p-10'>
@@ -266,7 +264,19 @@ const Home = () => {
                     </Card>
                 </div>
             </div> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
-          </> : <div className="flex h-[calc(100vh-120px)] sm:h-[calc(100vh-70px)]">{Spinner({className:"w-16 m-auto"})}</div>}
+          </> 
+          :
+            <div className='max-w-[800px] mx-auto p-6'>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account under review</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>Please wait until an administrator has manually approved your account. If more than 24 hours pass without approval, please contact k200338@nu.edu.pk.</CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+          }
         </>
      );
 }

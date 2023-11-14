@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useContext, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import { Annotation, Document, User } from "../../api.ts";
-import { useAuth, userContextType } from "@/context";
+import { useAuth } from "@/context";
 import { checkForServerError, bytesToBase64 } from "@/lib/utils.ts";
 import { useToast } from "@/components/ui/use-toast.ts";
 import Papa from "papaparse";
@@ -81,6 +81,7 @@ export default function Admin() {
   const {toast} = useToast();
   const navigate = useNavigate();
 
+
   function approveUser(userId: string) {
     console.log(user?.token)
     if (user) {
@@ -104,9 +105,12 @@ export default function Admin() {
     }
   }
   
+  const data = useMemo(() => {
+    return users.filter(user => user.approved)
+  }, [users]);
 
   const table = useReactTable({
-    data : users.filter(user => user.approved),
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
@@ -152,7 +156,7 @@ export default function Admin() {
         const validated = results.data.map((item : any) => ({ text : item.text, metadata : item.metadata}));
         const jsonResults = JSON.stringify(validated);
         const compressedResults = bytesToBase64(pako.deflate(jsonResults));
-        // console.log({ data : compressedResults.length / (1024 * 1024)});
+        console.log({ data : compressedResults.length / (1024 * 1024)});
         await Document.add({
           body : {
             compressedResults
@@ -231,6 +235,8 @@ export default function Admin() {
     } 
   }; 
 
+  console.log(users.filter(user => user.approved === false))
+
   return (
     <>
     {isProcessing && <div className="bg-gray-100 bg-opacity-80 z-20 fixed top-0 left-0 w-full h-full flex items-center justify-center inset-0">{Spinner({className:"w-16"})}</div>}
@@ -294,6 +300,7 @@ export default function Admin() {
            
       <hr/>
       <CardContent className="grid gap-6 py-6">
+      {users.filter(user => user.approved === false).length ?
         <Table>
           <TableHeader>
             <TableRow>
@@ -306,30 +313,34 @@ export default function Admin() {
           </TableHeader>
           <TableBody>
             {users.filter(user => user.approved === false).map((user, userIndex) => (
-              <TableRow key={userIndex}>
-                <td>
-                  <div className="text-center">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.profile} alt="@shadcn" />
-                    </Avatar>
-                  </div> 
-                </td>
-                <td>
-                  <div className="max-w-[60px] overflow-hidden overflow-ellipsis text-center">{user.id}</div> 
-                </td>
-                <td>
-                  <div className="text-center">{user.name}</div> 
-                </td>
-                <td>
-                  <div className="text-center">{user.email}</div> 
-                </td>
-                <td>
-                  <Button className="bg-green-700 text-white" onClick={() => approveUser(user.id)}>Approve</Button>
-                </td>
-              </TableRow>
+                <TableRow key={userIndex}>
+                  <td>
+                    <div className="text-center">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.profile} alt="@shadcn" />
+                      </Avatar>
+                    </div> 
+                  </td>
+                  <td>
+                    <div className="max-w-[60px] overflow-hidden overflow-ellipsis text-center">{user.id}</div> 
+                  </td>
+                  <td>
+                    <div className="text-center">{user.name}</div> 
+                  </td>
+                  <td>
+                    <div className="text-center">{user.email}</div> 
+                  </td>
+                  <td>
+                    <Button className="bg-green-700 text-white" onClick={() => approveUser(user.id)}>Approve</Button>
+                  </td>
+                </TableRow>
+              
             ))}
           </TableBody>
         </Table>
+      :
+        <CardDescription>No user approvals pending. Good Job!</CardDescription>
+      }
       </CardContent>
     </Card>
 
