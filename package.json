@@ -1,0 +1,12 @@
+{
+  "name": "annotext",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build" :"npm run build --client && npm run build --server",
+    "start" : "npm start --prefix server"
+  },
+  "author": "",
+  "license": "ISC"
+}
