@@ -16,9 +16,28 @@ export async function approveUser(id : string){
     await prismaClient.user.update({ where : { id }, data : { approved : true }})
 }
 
-export async function getAllUsers(ids : string[]){
+export async function getAllUsers(skip ?: number, take ?: number){
     const users = await prismaClient.user.findMany({ 
-        where : { id : { in : ids }}
+        skip,
+        take
+    });
+    return users;
+}
+
+export async function getAllApprovedUsers(skip ?: number, take ?: number){
+    const users = await prismaClient.user.findMany({ 
+        skip,
+        take,
+        where : { approved : true }
+    });
+    return users;
+}
+
+export async function getAllUnapprovedUsers(skip ?: number, take ?: number){
+    const users = await prismaClient.user.findMany({ 
+        skip,
+        take,
+        where : { approved : false }
     });
     return users;
 }

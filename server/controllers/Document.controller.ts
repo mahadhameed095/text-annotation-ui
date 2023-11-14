@@ -20,6 +20,7 @@ const DocumentController = server.router(ApiContract.document, {
                           })
                           .array()
                           .parse(JSON.parse(inflatedData));
+                          
       const ids = await DocumentService.createDocuments(documents);
       return { status : 201, body : ids };
     }

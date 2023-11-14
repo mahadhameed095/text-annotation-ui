@@ -24,19 +24,29 @@ const UserContract = c.router({
         },
         summary : 'Approve a user for annotation(admin-only)'
     },
-    listAll : {
+    listApproved : {
         method : 'GET',
         path : '/',
         headers : z.object({ authorization : z.string() }),
         query : z.object({
-            take : z.coerce.number().max(1000).optional(),
-            pageToken : z.string().optional()
+            take : z.coerce.number().max(100).optional(),
+            skip : z.coerce.number().int()
         }),
         responses : {
-            200 : z.object({ 
-                users: UserSchema.array(),
-                pageToken : z.string().optional()
-            })
+            200 : UserSchema.array()
+        },
+        summary : 'Get all users. (admin-only access)'
+    },
+    listUnapproved : {
+        method : 'GET',
+        path : '/',
+        headers : z.object({ authorization : z.string() }),
+        query : z.object({
+            take : z.coerce.number().max(100).optional(),
+            skip : z.coerce.number().int()
+        }),
+        responses : {
+            200 : UserSchema.array()
         },
         summary : 'Get all users. (admin-only access)'
     }
