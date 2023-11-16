@@ -47,8 +47,10 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
                 }
                 setUser(userDetails);
               }
-            })
             }).catch((error) => {
+              console.log(error)
+            })
+          }).catch((error) => {
               console.log(error)
           });
       }
