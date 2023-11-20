@@ -12,6 +12,7 @@ import { Annotation, ApiContract } from "../../api.ts";
 import { useAuth } from '@/context';
 import { ClientInferResponseBody } from '@ts-rest/core';
 import Spinner from '@/components/Spinner.tsx';
+import { useToast } from '@/components/ui/use-toast.ts';
 
 const frameworks = [
     {
@@ -53,6 +54,7 @@ const Home = () => {
     const [value, setValue] = useState<string>("last 7 days");
     const {user} = useAuth();
     const [data, setData] = useState<AnnotaterStatistics | null>(null);
+    const {toast} = useToast();
     const navigate = useNavigate();
     
     function fetchCardData() {
@@ -121,6 +123,12 @@ const Home = () => {
         
           setData({labels : cardData["labels"], performance: performanceData, progress: {total, annotated, user_annotated}})
         }
+      }).catch((error) => {
+        toast({
+          variant: "destructive",
+          title: error.message,
+          description: "Contact k200338@nu.edu.pk for assistance",
+        })
       })
     }, [value])
 

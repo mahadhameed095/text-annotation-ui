@@ -46,11 +46,12 @@ const AnnotationTool = () => {
                             headers: {
                                 authorization: `Bearer ${user.token}`
                             },                        
-                        }).then(({status, body}) => {
+                        }).then(({status, body: newAnnotationData}) => {
                             checkForServerError(status, toast);
                             if (status == 200) {
                                 console.log("reserving tasks...")
-                                return body.sort((a, b) => a.id - b.id)
+                                const concatenatedData = body.concat(newAnnotationData).sort((a, b) => a.id - b.id);
+                                return concatenatedData;
                             }
                         })
                     }
@@ -152,7 +153,7 @@ const AnnotationTool = () => {
     const onSubmit = () => {
         const { hateful, islamic } = labelsToSubmit.current;
 
-        if(hateful === null || islamic === null) 
+        if (hateful === null || islamic === null) 
             alert("cannot submit because null.");
         else{
             if (data.current && user && activeEntryIndex != null) {
@@ -169,7 +170,6 @@ const AnnotationTool = () => {
                     } 
                 }).then(({status}) => {
                     if (status == 200) {
-
                         (data.current[activeEntryIndex] as any).value = {
                             hateful: hateful,
                             islamic: islamic
@@ -181,21 +181,24 @@ const AnnotationTool = () => {
         }
     }
 
-
     useHotkeys('enter', onSubmit);
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4"> 
-        {(data.current && activeEntryIndex !== null && data.current[activeEntryIndex]) &&
-            <EntryUI 
-                entry={data.current[activeEntryIndex]} 
-                onChange={onChange}
-                onSubmit={onSubmit}
-                checkDisabled={checkDisabled}
-                incrementActiveEntryIndex={incrementActiveEntryIndex}
-                decrementActiveEntryIndex={decrementActiveEntryIndex}
-            />
-        }
+            {(data.current && activeEntryIndex !== null && data.current[activeEntryIndex]) ?
+                <EntryUI 
+                    entry={data.current[activeEntryIndex]} 
+                    onChange={onChange}
+                    onSubmit={onSubmit}
+                    checkDisabled={checkDisabled}
+                    incrementActiveEntryIndex={incrementActiveEntryIndex}
+                    decrementActiveEntryIndex={decrementActiveEntryIndex}
+                />
+            :
+                <div className="text-center">
+                    No Annotations Remaining. Good job.
+                </div>
+            }
         </div>
      );
 }
