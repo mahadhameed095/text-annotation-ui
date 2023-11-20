@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "deploy": "prisma migrate deploy && npm start",
-    "start": "node dist/app.js",
+    "start": "node dist/startup.js && node dist/app.js",
     "build": "npm install && prisma generate && tsc",
     "dev": "nodemon app.ts",
     "prisma-studio": "prisma studio",

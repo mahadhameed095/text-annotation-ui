@@ -62,7 +62,21 @@ export const EnvSchema = z.object({
     MAX_RESERVATIONS : z.string(),
     RESERVATION_EXPIRY_IN_HOURS : z.string(),
     NUM_ANNOTATIONS_PER_DOCUMENT : z.string(),
-    ACCESS_TOKEN_SECRET : z.string()
+    ACCESS_TOKEN_SECRET : z.string(),
+    VITE_SERVER_ENDPOINT : z.string(),
+
+    /* Firebase service account key json file as environment variables */
+    FIREBASE_AUTH_TYPE : z.string(),
+    FIREBASE_AUTH_PROJECT_ID : z.string(),
+    FIREBASE_AUTH_PRIVATE_KEY_ID : z.string(),
+    FIREBASE_AUTH_PRIVATE_KEY : z.string(),
+    FIREBASE_AUTH_CLIENT_EMAIL : z.string(),
+    FIREBASE_AUTH_CLIENT_ID : z.string(),
+    FIREBASE_AUTH_AUTH_URI : z.string(),
+    FIREBASE_AUTH_TOKEN_URI : z.string(),
+    FIREBASE_AUTH_AUTH_PROVIDER_X509_CERT_URL : z.string(),
+    FIREBASE_AUTH_CLIENT_X509_CERT_URL : z.string(),
+    FIREBASE_AUTH_UNIVERSE_DOMAIN : z.string()
 });
 
 export const EnvSchemaWithTransform = z.object({
@@ -72,7 +86,7 @@ export const EnvSchemaWithTransform = z.object({
     RESERVATION_EXPIRY_IN_HOURS : z.coerce.number(),
     NUM_ANNOTATIONS_PER_DOCUMENT : z.coerce.number().int(),
     ACCESS_TOKEN_SECRET : z.string(),
-    SERVER_ENDPOINT : z.string(),
+    VITE_SERVER_ENDPOINT : z.string(),
 
     /* Firebase service account key json file as environment variables */
     FIREBASE_AUTH_TYPE : z.string(),
