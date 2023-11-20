@@ -7,6 +7,7 @@ import { useAuth } from "@/context";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { Nullable, checkForServerError } from "@/lib/utils.ts";
 import { useToast } from '@/components/ui/use-toast';
+import Spinner from '@/components/Spinner';
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getPastAnnotations'], 200>
@@ -18,7 +19,8 @@ type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 const AnnotationTool = () => {
     const {user} = useAuth();
-    const [_, setIsAuthenticated] = useState(false);
+    const [isFetching, setIsFetching] = useState<Boolean>(false);
+     const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
     const {toast} = useToast();
@@ -102,6 +104,8 @@ const AnnotationTool = () => {
 
 
     useEffect(() => {
+        setIsFetching(true)
+
         Promise.all([
             fetchInitialTasks(),
             fetchHistory()
@@ -118,6 +122,15 @@ const AnnotationTool = () => {
                     setActiveEntryIndex(0);
                 }
             }
+            setIsFetching(false);
+        }).catch((error) => {
+            console.log(error);
+            toast({
+                variant: "destructive",
+                title: error.message,
+                description: "Please contact k200338@nu.edu.pk for assistance"
+            })
+            setIsFetching(false);
         })
       }, [])
 
@@ -195,9 +208,15 @@ const AnnotationTool = () => {
                     decrementActiveEntryIndex={decrementActiveEntryIndex}
                 />
             :
-                <div className="text-center">
-                    No Annotations Remaining. Good job.
-                </div>
+                <>
+                    { isFetching === true ?
+                        Spinner({className:"w-16 m-auto"})
+                    :
+                        <div className="text-center">
+                            No Annotations Remaining. Good job.
+                        </div>
+                    }
+                </>
             }
         </div>
      );
