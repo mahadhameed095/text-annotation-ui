@@ -7,6 +7,11 @@ export async function createUser(id : string) : Promise<DBUser> {
     return result;
 }
 
+export async function createAdmin(id : string) : Promise<DBUser> {
+    const result = await prismaClient.user.create({ data : { id, approved : true, role : "ADMIN" }});
+    return result;
+}
+
 export async function getUserById(id : string) : Promise<DBUser | null> {
     const user = await prismaClient.user.findFirst({ where : { id }});
     return user;
