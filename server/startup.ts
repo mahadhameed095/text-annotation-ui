@@ -7,11 +7,12 @@ const uids = [
     "VlqWoer8jvZ9XRcYEMfEfrblup03", //ahmed
 ]
 
-prismaClient.$transaction( async tx => {
-    for(const uid of uids){
-        const user = await getUserById(uid);
-        if(!user){
-            await createAdmin(uid);
-        }
-    }
-}).then(() => console.log("---------------start up script executed------------------"));
+const admin = { approved : true, role : "ADMIN" } as const;
+
+prismaClient.$transaction(
+    uids.map(id => prismaClient.user.upsert({
+        where : { id },
+        create : { id, ...admin},
+        update : admin,
+    }))
+).then(() => console.log("---------------start up script executed------------------"));
