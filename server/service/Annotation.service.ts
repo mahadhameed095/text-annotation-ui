@@ -40,7 +40,7 @@ export async function reserveAnnotations(annotatorId : User['id']){
             ORDER BY 
 		          "documentId", Random()
 	          LIMIT ${Env.MAX_RESERVATIONS}
-          ),
+          )
           
           UPDATE "Annotation" AS a
             SET 
