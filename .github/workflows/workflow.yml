@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '18.x'
 
+      - name: Building
+        run: npm run build
+
       - name: Zip artifact for deployment
         run: zip -r release.zip ./* -r
 
