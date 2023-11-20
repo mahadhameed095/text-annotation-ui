@@ -25,7 +25,7 @@ jobs:
         run: npm run build
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./* -r
+        run: zip -r release.zip client/dist server
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
