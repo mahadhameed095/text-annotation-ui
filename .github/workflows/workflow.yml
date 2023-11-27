@@ -26,6 +26,8 @@ jobs:
         run: npm run build
 
       - name: Apply DB Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm run migrate --prefix server
 
       - name: Zip artifact for deployment
