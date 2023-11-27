@@ -26,12 +26,11 @@ const Authentication = () => {
             setIsLoading(false);
         })
     };
-  
 
     return ( 
         <div className="flex h-[calc(100vh-64px)]">
             {
-            isLoading === false || user !== null ? 
+            isLoading === false && user === null ? 
                 <Card className='bg-white shadow-md rounded w-120 m-auto'>
                     <CardHeader className="space-y-1">
                         <CardTitle className="text-2xl text-center">Sign In with your Google Account</CardTitle>

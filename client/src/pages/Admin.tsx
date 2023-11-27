@@ -175,6 +175,12 @@ export default function Admin() {
           headers : {
             authorization : `BEARER ${user.token}`
           }
+        }).then(({status}) => {
+          if (status === 201) {
+            toast({
+              title: "File uploaded successfully",
+            })
+          }
         });
       },
       header: true,

@@ -2,6 +2,7 @@ import { PropsWithChildren, createContext, useContext, useEffect, useState } fro
 import { auth } from './firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { User } from '../api.ts';
+import { useToast } from './components/ui/use-toast.ts';
 
 export interface userType {
     id: string
@@ -26,6 +27,7 @@ const UserContext = createContext(defaultUserContext);
 
 export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children } : any) => {
   const [user, setUser] = useState<userType | null>(null);
+  const {toast} = useToast();
 
   useEffect(() => {
     onAuthStateChanged(auth, () => {    
@@ -48,10 +50,18 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
                 setUser(userDetails);
               }
             }).catch((error) => {
-              console.log(error)
+              toast({
+                variant: "destructive",
+                title: error.message,
+                description: "Contact k200338@nu.edu.pk for assistance",
+              })
             })
           }).catch((error) => {
-              console.log(error)
+            toast({
+              variant: "destructive",
+              title: error.message,
+              description: "Contact k200338@nu.edu.pk for assistance",
+            })
           });
       }
       else {

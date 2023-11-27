@@ -7,6 +7,7 @@ import { useAuth } from "@/context";
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { Nullable, checkForServerError } from "@/lib/utils.ts";
 import { useToast } from '@/components/ui/use-toast';
+import Spinner from '@/components/Spinner';
 
 type assignedAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getAssignedAnnotations'], 200> 
 type pastAnnotationTypeArray = ClientInferResponseBody<typeof ApiContract['annotation']['getPastAnnotations'], 200>
@@ -18,7 +19,8 @@ type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 
 const AnnotationTool = () => {
     const {user} = useAuth();
-    const [_, setIsAuthenticated] = useState(false);
+    const [isFetching, setIsFetching] = useState<Boolean>(false);
+     const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
     const {toast} = useToast();
@@ -46,11 +48,12 @@ const AnnotationTool = () => {
                             headers: {
                                 authorization: `Bearer ${user.token}`
                             },                        
-                        }).then(({status, body}) => {
+                        }).then(({status, body: newAnnotationData}) => {
                             checkForServerError(status, toast);
                             if (status == 200) {
                                 console.log("reserving tasks...")
-                                return body.sort((a, b) => a.id - b.id)
+                                const concatenatedData = body.concat(newAnnotationData).sort((a, b) => a.id - b.id);
+                                return concatenatedData;
                             }
                         })
                     }
@@ -101,6 +104,8 @@ const AnnotationTool = () => {
 
 
     useEffect(() => {
+        setIsFetching(true)
+
         Promise.all([
             fetchInitialTasks(),
             fetchHistory()
@@ -117,6 +122,15 @@ const AnnotationTool = () => {
                     setActiveEntryIndex(0);
                 }
             }
+            setIsFetching(false);
+        }).catch((error) => {
+            console.log(error);
+            toast({
+                variant: "destructive",
+                title: error.message,
+                description: "Please contact k200338@nu.edu.pk for assistance"
+            })
+            setIsFetching(false);
         })
       }, [])
 
@@ -152,7 +166,7 @@ const AnnotationTool = () => {
     const onSubmit = () => {
         const { hateful, islamic } = labelsToSubmit.current;
 
-        if(hateful === null || islamic === null) 
+        if (hateful === null || islamic === null) 
             alert("cannot submit because null.");
         else{
             if (data.current && user && activeEntryIndex != null) {
@@ -169,7 +183,6 @@ const AnnotationTool = () => {
                     } 
                 }).then(({status}) => {
                     if (status == 200) {
-
                         (data.current[activeEntryIndex] as any).value = {
                             hateful: hateful,
                             islamic: islamic
@@ -181,21 +194,30 @@ const AnnotationTool = () => {
         }
     }
 
-
     useHotkeys('enter', onSubmit);
 
     return (
         <div className="container px-6 lg:px-20 mx-auto mt-4"> 
-        {(data.current && activeEntryIndex !== null && data.current[activeEntryIndex]) &&
-            <EntryUI 
-                entry={data.current[activeEntryIndex]} 
-                onChange={onChange}
-                onSubmit={onSubmit}
-                checkDisabled={checkDisabled}
-                incrementActiveEntryIndex={incrementActiveEntryIndex}
-                decrementActiveEntryIndex={decrementActiveEntryIndex}
-            />
-        }
+            {(data.current && activeEntryIndex !== null && data.current[activeEntryIndex]) ?
+                <EntryUI 
+                    entry={data.current[activeEntryIndex]} 
+                    onChange={onChange}
+                    onSubmit={onSubmit}
+                    checkDisabled={checkDisabled}
+                    incrementActiveEntryIndex={incrementActiveEntryIndex}
+                    decrementActiveEntryIndex={decrementActiveEntryIndex}
+                />
+            :
+                <>
+                    { isFetching === true ?
+                        Spinner({className:"w-16 m-auto"})
+                    :
+                        <div className="text-center">
+                            No Annotations Remaining. Good job.
+                        </div>
+                    }
+                </>
+            }
         </div>
      );
 }
