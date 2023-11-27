@@ -10,6 +10,7 @@ import { patchOpenAPIDocument } from './utils';
 import * as swaggerUi from 'swagger-ui-express';
 import Env from './ENV';
 import startup from './startup';
+import path from 'path';
 
 startup()
   .then(() => {
@@ -48,7 +49,7 @@ startup()
     patchOpenAPIDocument(openApiDocument);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
     
-    const distPath = '../../client/dist';
+    const distPath = path.join(__dirname, '../../client/dist');
     app.use('/', express.static(distPath));
     
     app.get('/*', (req, res) => {
