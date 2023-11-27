@@ -6,7 +6,7 @@
   "scripts": {
     "migrate": "prisma migrate deploy",
     "start": "node dist/index.js",
-    "build": "npm install && prisma generate && npm run build-source && copyfiles node_modules/@prisma/client/* node_modules/.prisma/client/* prisma/schema.prisma dist",
+    "build": "npm install && prisma generate && npm run build-source && copyfiles -u 1 node_modules/.prisma/client/* ../",
     "build-source": "esbuild index.ts --platform=node --bundle --minify --outfile=dist/index.js",
     "dev": "nodemon index.ts",
     "prisma-studio": "prisma studio",
