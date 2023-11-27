@@ -31,7 +31,7 @@ jobs:
         run: npm run migrate --prefix server
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip package.json client/dist server/dist server/package.json
+        run: zip -r release.zip package.json client/dist server/dist .prisma server/package.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
