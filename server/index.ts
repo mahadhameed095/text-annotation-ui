@@ -16,7 +16,7 @@ startup()
   .then(() => {
     console.log("Startup script executed. Now Starting server....");
     const app = express();
-    app.use(cors());
+    // app.use(cors());
     app.use(bodyParser.urlencoded({ extended: false }));
     
     createExpressEndpoints(

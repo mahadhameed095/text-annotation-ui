@@ -8,7 +8,7 @@ export default async function Auth(req : Request, res : Response, next : NextFun
     try{
       const { phone_number, email, name, uid, picture} = await auth.verifyIdToken(token);
       const dbUser = await getUserById(uid);
-      if(!dbUser) throw Error;
+      if(!dbUser || !dbUser.approved) throw Error;
       req.user = {phone_number, email, name, profile : picture, ...dbUser};
       next();
     }
