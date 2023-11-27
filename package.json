@@ -2,11 +2,10 @@
   "name": "annotext",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/dist/index.js",
   "scripts": {
     "build": "cd server && npm run build && cd ../client && npm run build",
-    "start" : "npm start --prefix server",
-    "deploy" : "npm run deploy --prefix server"
+    "start" : "npm start --prefix server"
   },
   "author": "",
   "license": "ISC"
