@@ -37,17 +37,18 @@ export async function reserveAnnotations(annotatorId : User['id']){
                 "assignmentTimestamp" IS NULL OR
                 CURRENT_TIMESTAMP - "assignmentTimestamp" >= INTERVAL '${Env.RESERVATION_EXPIRY_IN_HOURS} hours'
               )
-            ORDER BY 
-		          "documentId", Random()
-	          LIMIT ${Env.MAX_RESERVATIONS}
+          ),
+          RandomlySelected AS (
+            SELECT * FROM FreeDocuments
+            ORDER BY RANDOM()
+            LIMIT ${Env.MAX_RESERVATIONS}
           )
-          
           UPDATE "Annotation" AS a
             SET 
               "annotatorId" = ${annotatorId},
               "assignmentTimestamp" = CURRENT_TIMESTAMP
             WHERE
-              a."id" in (SELECT "id" FROM FreeDocuments)
+              a."id" in (SELECT "id" FROM RandomlySelected)
           
           RETURNING a."id", a."assignmentTimestamp",(
             SELECT jsonb_build_object(

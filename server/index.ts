@@ -1,6 +1,5 @@
 import { createExpressEndpoints } from '@ts-rest/express';
 import bodyParser from 'body-parser';
-import cors from 'cors';
 import express from 'express';
 import ApiContract from "./contracts";
 import * as Controllers from "./controllers";
