@@ -185,3 +185,17 @@ export async function getConflictingRows(){
 	    COUNT(DISTINCT "value"->>'islamic') > 1;`
     return await prismaClient.$queryRaw<ConflictingDocument[]>(sql);
 }
+
+export async function skipAnnotation(annotationId : Annotation['id'], annotatorId : User['id']){
+    await prismaClient.annotation.update({ 
+        where : { 
+            id : annotationId,
+            annotatorId,
+            value : { equals : Prisma.JsonNull }
+        },
+        data : {
+            annotatorId : null,
+            assignmentTimestamp : null,
+        }
+    })
+}

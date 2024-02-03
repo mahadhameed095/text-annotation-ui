@@ -4,9 +4,9 @@ import express from 'express';
 import ApiContract from "./contracts";
 import * as Controllers from "./controllers";
 import { AdminOnly, Auth } from './middleware';
-import { generateOpenApi } from '@ts-rest/open-api';
-import { patchOpenAPIDocument } from './utils';
-import * as swaggerUi from 'swagger-ui-express';
+// import { generateOpenApi } from '@ts-rest/open-api';
+// import { patchOpenAPIDocument } from './utils';
+// import * as swaggerUi from 'swagger-ui-express';
 import Env from './ENV';
 import startup from './startup';
 import path from 'path';
@@ -37,16 +37,16 @@ startup()
       { globalMiddleware : [bodyParser.json(), Auth] }
     );
     
-    const openApiDocument = generateOpenApi(ApiContract, {
-      info: {
-        title: 'API',
-        version: '1.0.0',
+    // const openApiDocument = generateOpenApi(ApiContract, {
+    //   info: {
+    //     title: 'API',
+    //     version: '1.0.0',
         
-      },
-    });
+    //   },
+    // });
     
-    patchOpenAPIDocument(openApiDocument);
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+    // patchOpenAPIDocument(openApiDocument);
+    // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
     
     const distPath = path.join(__dirname, '../../client/dist');
     app.use('/', express.static(distPath));

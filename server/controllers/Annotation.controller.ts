@@ -4,7 +4,7 @@ import { AnnotationService } from "../service";
 import { AdminOnly } from "../middleware";
 
 const server = initServer();
-const DocumentController = server.router(ApiContract.annotation, {
+const AnnotationController = server.router(ApiContract.annotation, {
     submitAnnotation : async ({ body : { value, id }, req : { user }}) => {
         await AnnotationService.submitAnnotation(id, user.id, value);
         return { status : 200, body : {} };
@@ -50,7 +50,11 @@ const DocumentController = server.router(ApiContract.annotation, {
                 body : await AnnotationService.getConflictingRows()
             };
         }
+    },
+    skipAnnotation : async ({ body : { id }, req : { user }}) => {
+        AnnotationService.skipAnnotation(id, user.id);
+        return { status : 200, body : {}}
     }
 });
 
-export default DocumentController;
+export default AnnotationController;

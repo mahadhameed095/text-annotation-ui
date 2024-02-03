@@ -102,6 +102,17 @@ const AnnotationContract = c.router({
         200 : ConflictingDocumentSchema.array()
       },
       summary : 'Get all documents with conflicts in their annotations(not all labels are same for the documents) (admin-only action)' 
+    },
+    skipAnnotation : {
+      method : 'PATCH',
+      path : '/skipAnnotation',
+      body : AnnotationSchema.pick({
+        id : true
+      }),
+      responses : {
+        200 : z.object({}),
+      },
+      summary : 'un-reserves a reserved annotation task for a particular annotator. That task is now part of the free pool after skipping. Note: This same task can be reserved by the same annotator again.'
     }
   },
   {
