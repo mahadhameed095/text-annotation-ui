@@ -5,7 +5,7 @@ export * from '../server/schemas';
 
 export type Labels = Value;
 
-const baseUrl =  "https://annotext.azurewebsites.net";
+const baseUrl =  "http://127.0.0.1:5433";
 
 export const User = initClient(ApiContract.user, {
     baseUrl,
