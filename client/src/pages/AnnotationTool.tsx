@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { useHotkeys } from 'react-hotkeys-hook'
 import EntryUI from "../components/EntryUI";
 import { Annotation, Labels, ApiContract } from "../../api.ts";
@@ -20,8 +20,9 @@ type pastAnnotationType = UnwrapArray<pastAnnotationTypeArray>;
 const AnnotationTool = () => {
     const {user} = useAuth();
     const [isFetching, setIsFetching] = useState<Boolean>(false);
-     const [_, setIsAuthenticated] = useState(false);
+    const [_, setIsAuthenticated] = useState(false);
     const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
     const data = useRef<(assignedAnnotationType | pastAnnotationType)[]>([]);
     const {toast} = useToast();
     const labelsToSubmit = useRef<Nullable<Labels>>({
@@ -43,7 +44,7 @@ const AnnotationTool = () => {
             }).then(({status, body}) => {
                 checkForServerError(status, toast);
                 if (status == 200) {
-                    if (body.length < 5) {
+                    if (body.length < 5) {  // If less than 5 assigned annotations, reserve and fetch more
                         return Annotation.reserveAnnotation({
                             headers: {
                                 authorization: `Bearer ${user.token}`
@@ -147,12 +148,19 @@ const AnnotationTool = () => {
             if ((data.current.length-1) - activeEntryIndex < 3) {
                 console.log("fetching more docs....")
                 fetchMoreTasks()?.then((new_tasks) => {
-                    data.current = data.current.concat(new_tasks as any)
-                    console.log("udpated task list", data.current)
+                    if (new_tasks?.length !== 0) {
+                        data.current = data.current.concat(new_tasks as any)
+                        console.log("udpated task list", data.current)
+                    }
+                    else {
+                        console.log("no more tasks remaining currently")
+                    }
                 })
             }
-            if ("value" in data.current[activeEntryIndex]) {
-                setActiveEntryIndex(activeEntryIndex + 1);
+            if ("value" in data.current[activeEntryIndex]) { // only continue if the current document has been annotated
+                if (activeEntryIndex < data.current.length-1) { // do not continue if there are no more "reserved" documents to annotate
+                    setActiveEntryIndex(activeEntryIndex + 1);
+                }
             }
         }      
     }
@@ -194,6 +202,47 @@ const AnnotationTool = () => {
         }
     }
 
+    const onSkip = () => {
+        if (user && activeEntryIndex != null) {
+            Annotation.skipAnnotation({
+                headers: {
+                    authorization: `Bearer ${user.token}`
+                },
+                body : {
+                    id:  data.current[activeEntryIndex].id
+                }
+            }).then(({status}) => {
+                if (status === 200) {
+                    console.log("skipped successfully")
+            
+                    const newData = [...data.current];          // Make a copy of the array to avoid modifying the original array directly
+                    newData.splice(activeEntryIndex, 1);        // Remove the element at activeEntryIndex
+                    data.current = newData;                     // Update the state or ref with the modified array
+
+                    if ((data.current.length-1) - activeEntryIndex < 3) {
+                        console.log("fetching more docs....")
+                        fetchMoreTasks()?.then((new_tasks) => {
+                            if (new_tasks?.length !== 0) {
+                                data.current = data.current.concat(new_tasks as any)
+                                console.log("udpated task list", data.current)
+                            }
+                            else {
+                                console.log("no more tasks remaining currently")
+                            }
+                        })
+                    }
+
+                    if (activeEntryIndex >= data.current.length) {  // Edge case where no more annotations remain,
+                        decrementActiveEntryIndex()                 // and the annotatoer skips the last one.
+                    }
+                    else {
+                        forceUpdate();
+                    }
+                }
+            })
+        }
+    }
+
     useHotkeys('enter', onSubmit);
 
     return (
@@ -203,6 +252,7 @@ const AnnotationTool = () => {
                     entry={data.current[activeEntryIndex]} 
                     onChange={onChange}
                     onSubmit={onSubmit}
+                    onSkip={onSkip}
                     checkDisabled={checkDisabled}
                     incrementActiveEntryIndex={incrementActiveEntryIndex}
                     decrementActiveEntryIndex={decrementActiveEntryIndex}
