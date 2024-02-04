@@ -204,7 +204,7 @@ const AnnotationTool = () => {
 
     const onSkip = () => {
         if (user && activeEntryIndex != null) {
-            Annotation.skipAnnotation({
+            return Annotation.skipAnnotation({
                 headers: {
                     authorization: `Bearer ${user.token}`
                 },
@@ -221,7 +221,7 @@ const AnnotationTool = () => {
 
                     if ((data.current.length-1) - activeEntryIndex < 3) {
                         console.log("fetching more docs....")
-                        fetchMoreTasks()?.then((new_tasks) => {
+                        return fetchMoreTasks()?.then((new_tasks) => {
                             if (new_tasks?.length !== 0) {
                                 data.current = data.current.concat(new_tasks as any)
                                 console.log("udpated task list", data.current)

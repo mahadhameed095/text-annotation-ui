@@ -29,7 +29,7 @@ export default function EntryUI({
     entry : assignedAnnotationType | pastAnnotationType,
     onChange : (labels : Nullable<Labels>) => void;
     onSubmit : () => Promise<void> | undefined;
-    onSkip : () => void,
+    onSkip : () => Promise<void> | undefined;
     incrementActiveEntryIndex : () => void;
     decrementActiveEntryIndex : () => void;
     checkDisabled : () => boolean;
@@ -94,6 +94,13 @@ export default function EntryUI({
         })
     }
 
+    const onSkipButton = () => {
+        setIsLoading(true);
+        onSkip()?.then(() => {
+            setIsLoading(false);
+        });
+    }
+
     useHotkeys('1', onChangeHandler('islamic', true));
     useHotkeys('2', onChangeHandler('islamic', false));
     useHotkeys('3', onChangeHandler('hateful', true));
@@ -134,7 +141,11 @@ export default function EntryUI({
         <Card className="basis-1/4 mt-4 sm:mt-0">
             <CardHeader className="flex flex-row">
                 <h1 className="uppercase font-bold text-lg">Annotation</h1>
-                <CardDescription className="text-sm ml-1 hover:cursor-pointer hover:underline" onClick={onSkip}>(skip)</CardDescription>
+                { ("value" in entry) || (isLoading) ?
+                    ""
+                    : 
+                    <CardDescription className="text-sm ml-1 hover:cursor-pointer hover:underline" onClick={onSkipButton}>(skip)</CardDescription>
+                }
             </CardHeader>
             <CardContent className="">
                 <h2 className="font-semibold text-md mb-2">Religion</h2>
