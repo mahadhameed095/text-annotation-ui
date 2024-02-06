@@ -46,9 +46,9 @@ const AnnotationContract = c.router({
       responses : {
         200 : AnnotationSchema.pick({
           id : true,
-          value : true,
           annotationTimestamp : true
         }).extend({
+          value : ValueSchema,
           document : DocumentSchema
         }).array()
       },
@@ -73,8 +73,8 @@ const AnnotationContract = c.router({
       }),
       responses : {
         200 : z.object({
-          day : z.string().transform(val => new Date(val)),
-          count : z.number()
+          day : z.date(),
+          count : z.coerce.number()
         }).array()
       },
       summary : 'Get number of annotated documents grouped by last <take> days'

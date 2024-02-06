@@ -3,6 +3,7 @@ import Env from '../ENV';
 import prismaClient from '../prisma';
 import { Annotation, AssignedAnnotation, ConflictingDocument, User, ValueCounts, ValueCountsSchema, ValueCountsWithId, ValueCountsWithIdSchema } from '../schemas';
 import { Prisma } from '@prisma/client';
+import Contracts from '../contracts';
 
 export async function submitAnnotation(
     annotationId : Annotation['id'],
@@ -161,13 +162,8 @@ export async function getAnnotatedCountOverTime(annotatorId : string, days : num
         GROUP BY day
         ORDER BY day;
     `;
-    const results = await prismaClient.$queryRaw<{day : string, count : BigInt}[]>(q);
-    return z.object({ 
-            day : z.coerce.string(),
-            count : z.coerce.number()
-        })
-            .array()
-            .parse(results);
+    const results = await prismaClient.$queryRaw(q);
+    return Contracts.annotation.getAnnotatedCountOverTime.responses[200].parse(results);
 }
 
 export async function getConflictingRows(){
