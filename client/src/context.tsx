@@ -16,21 +16,24 @@ export interface userType {
 export interface userContextType {
     user: userType | null;
     setUser: (user: userType | null) => void;
+    isFetching: boolean,
 };
 
 const defaultUserContext : userContextType = {
   user: null,
-  setUser: () => {}
+  setUser: () => {},
+  isFetching: false
 }
 
 const UserContext = createContext(defaultUserContext);
 
 export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children } : any) => {
   const [user, setUser] = useState<userType | null>(null);
+  const [isFetching, setIsFetching] = useState<boolean>(true);
   const {toast} = useToast();
 
-  useEffect(() => {
-    onAuthStateChanged(auth, () => {    
+  useEffect(() => { 
+    onAuthStateChanged(auth, () => {  
       if (auth.currentUser) {
           auth.currentUser.getIdToken(true).then((idToken) => {
             User.signIn({
@@ -48,6 +51,7 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
                   approved: body.approved
                 }
                 setUser(userDetails);
+                setIsFetching(false);
               }
             }).catch((error) => {
               toast({
@@ -55,6 +59,7 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
                 title: error.message,
                 description: "Contact k200338@nu.edu.pk for assistance",
               })
+              setIsFetching(false);
             })
           }).catch((error) => {
             toast({
@@ -62,10 +67,12 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
               title: error.message,
               description: "Contact k200338@nu.edu.pk for assistance",
             })
+            setIsFetching(false);
           });
       }
       else {
         setUser(null);
+        setIsFetching(false);
       }
     });
 
@@ -73,7 +80,7 @@ export const UserProvider : React.FC<PropsWithChildren<unknown>> = ({ children }
 
 
   return (
-    <UserContext.Provider value={{ user, setUser}}>
+    <UserContext.Provider value={{ user, setUser, isFetching}}>
       {children}
     </UserContext.Provider>
   );
