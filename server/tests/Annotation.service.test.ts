@@ -62,7 +62,7 @@ describe("Annotation Submission", () => {
             where :  { id : annotationId },
             select : { value : true } 
         });
-        console.log(result?.value, typeof result?.value);
+
         expect(value).toStrictEqual(result?.value); //because object comparison is weird in js
     });
     
@@ -210,7 +210,6 @@ describe("Get Annotated Count over time", () => {
 
     it("should return correct data", () => {
         expect(schema.safeParse(results).success).toBe(true);
-        console.table(results);
     });
 });
 
